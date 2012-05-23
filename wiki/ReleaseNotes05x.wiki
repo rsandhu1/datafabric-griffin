@@ -1,0 +1,42 @@
+#summary release notes 0.5.x
+
+== version 0.5.0 ==
+
+This is the first version. The implementation is according to GrifFTP version 1, and tested with ''uberftp-client'', ''globus-url-copy'' and ''globusrun-ws''.[[BR]]
+It has a few limitations:
+
+ * No parallel transfers, file transfer only with 1 data connection (1 stream)
+ * No DCAU
+ * MLSD is not implemented (this is needed by commons-vfs-grid so there may be some issues using cvg.)
+
+Hence with ''globus-url-copy'', option ''-nodcau'' should be used. (''-fast'' IS supported!)
+
+When submit a job, the file staging section has to have an extra RTP option to disable dcau, e.g.
+{{{
+   <fileStageIn>
+     <transfer>
+       <sourceUrl>gsiftp://ngdata-dev.hpcu.uq.edu.au/~/lzma.jar</sourceUrl>
+       <destinationUrl>file:///${GLOBUS_SCRATCH_DIR}/exe</destinationUrl>
+     </transfer>
+     <transfer>
+       <sourceUrl>gsiftp://ngdata-dev.hpcu.uq.edu.au/~/BigFile</sourceUrl>
+       <destinationUrl>file:///${GLOBUS_SCRATCH_DIR}/arg</destinationUrl>
+     </transfer>
+     <rftOptions>
+        <dcau>false</dcau>
+     </rftOptions>  
+   </fileStageIn>
+}}}
+
+The iRODS endpoint can be changed in the main configuration file.
+{{{
+        <bean id="fileSystem" class="au.org.arcs.griffin.filesystem.impl.JargonFileSystemImpl" singleton="false">
+                <property name="serverName" value="arcs-df.vpac.org" />
+                <property name="serverPort" value="1247" />
+                <property name="serverType" value="irods" />
+        </bean>
+}}}
+
+The package includes Jargon. So it can be used as a GridFTP interface for iRODS.
+
+RPM can be found from: http://projects.arcs.org.au/trac/systems/browser/trunk/dataFabricScripts/iRODS/iRODS-GridFTP-RPMS/
