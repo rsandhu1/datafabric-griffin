@@ -71,14 +71,14 @@ Log configuration file is `$GRIFFIN_HOME/log4j.properties`
 
 == Release Notes ==
 
- * [releasenotes/0.8.x 0.8.4] -  23 March 2012
- * [releasenotes/0.8.x 0.8.3] -  27 May 2011
- * [releasenotes/0.8.x 0.8.2] -  7 Apr 2011
- * [releasenotes/0.8.x 0.8.1] - 10 Mar 2011
- * [releasenotes/0.7.0 0.7.3] - 11 Oct 2010
- * [releasenotes/0.7.0 0.7.0] - 19 Apr 2010
- * [releasenotes/0.6.0 0.6.0] - 15 Mar 2010
- * [releasenotes/0.5.0 0.5.0] - 10 Feb 2010
+ * [releasenotes-0.8.x 0.8.4] -  23 March 2012
+ * [releasenotes-0.8.x 0.8.3] -  27 May 2011
+ * [releasenotes-0.8.x 0.8.2] -  7 Apr 2011
+ * [releasenotes-0.8.x 0.8.1] - 10 Mar 2011
+ * [releasenotes-0.7.0 0.7.3] - 11 Oct 2010
+ * [releasenotes-0.7.0 0.7.0] - 19 Apr 2010
+ * [releasenotes-0.6.0 0.6.0] - 15 Mar 2010
+ * [releasenotes-0.5.0 0.5.0] - 10 Feb 2010
 
 Get RPMs from:
 
