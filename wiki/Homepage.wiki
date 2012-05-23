@@ -71,7 +71,7 @@ Log configuration file is `$GRIFFIN_HOME/log4j.properties`
 
 == Release Notes ==
 
- * [Releasenotes-0.8.x 0.8.4] -  23 March 2012
+ * [ReleaseNotes0.8.x 0.8.4] -  23 March 2012
  * [releasenotes-0.8.x 0.8.3] -  27 May 2011
  * [releasenotes-0.8.x 0.8.2] -  7 Apr 2011
  * [releasenotes-0.8.x 0.8.1] - 10 Mar 2011
