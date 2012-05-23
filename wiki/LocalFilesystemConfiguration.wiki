@@ -1,4 +1,4 @@
-#Local Filesystem Configuration
+#summary Local Filesystem Configuration
 
 = Configuration of Local File System Storage Backend =
 The local storage end point can be configured in the main configuration file. It is important to adjust the `rootPath`
