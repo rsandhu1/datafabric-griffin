@@ -1,4 +1,4 @@
-#iRODS config
+#summary iRODS config
 
 = Configuration of iRODS Storage Backend =
 The iRODS end point can be changed in the main configuration file.
