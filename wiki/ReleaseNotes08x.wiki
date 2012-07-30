@@ -2,6 +2,9 @@
 
 0.8.0 is a backup version after re-structuring the source code. '''A re-install is needed''' if you want to upgrade a version prior to 0.8.0 to a version after 0.8.0.
 
+== 0.8.5 ==
+Upgraded jargon to 3.0
+
 == 0.8.4 ==
  * Fixed two problems reported by Giacomo when using GO
 {{{
