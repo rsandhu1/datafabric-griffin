@@ -13,13 +13,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.irods.jargon.core.connection.IRODSProtocolManager;
+import org.irods.jargon.core.connection.IRODSSession;
+import org.irods.jargon.core.connection.IRODSSimpleProtocolManager;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.IRODSFileSystem;
+import org.irods.jargon.core.pub.io.IRODSFile;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.exception.FtpConfigException;
 import au.org.arcs.griffin.filesystem.FileSystem;
 import au.org.arcs.griffin.filesystem.FileSystemConnection;
-
-import edu.sdsc.grid.io.irods.IRODSFile;
 
 /**
  * an implementation for jargon
@@ -38,6 +42,8 @@ public class JargonFileSystemImpl implements FileSystem {
 	private String defaultResource;
 	private UpdateThread updateThread;
 	private int updateInterval;
+	private IRODSSession iRODSFileSystem;
+	private IRODSProtocolManager iRODSProtocolManager;
 	
 	public int getUpdateInterval() {
 		return updateInterval;
@@ -91,7 +97,7 @@ public class JargonFileSystemImpl implements FileSystem {
 			GSSCredential credential) throws FtpConfigException, IOException{
 		if (mapping==null){
 			try {
-				FileSystemConnection connection = new JargonFileSystemConnectionImpl(serverName, serverPort, serverType, credential, defaultResource);
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, credential, defaultResource);
 				return connection;
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
@@ -102,7 +108,7 @@ public class JargonFileSystemImpl implements FileSystem {
 				String user=mapping.get(credential.getName().toString());
 				if (user==null) throw new FtpConfigException("User DN \""+credential.getName().toString()+"\" is not found in mapfile.");
 				if (user.indexOf("@")<0||user.split("@").length!=2) throw new FtpConfigException("Username in mapfile should be in form username@zone_name.");
-				FileSystemConnection connection = new JargonFileSystemConnectionImpl(serverName, serverPort, serverType, user.split("@")[0], user.split("@")[1], credential, defaultResource);
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, user.split("@")[0], user.split("@")[1], credential, defaultResource);
 				return connection;
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
@@ -115,6 +121,15 @@ public class JargonFileSystemImpl implements FileSystem {
 	}
 
 	public void init() throws IOException{
+		try {
+			iRODSProtocolManager=IRODSSimpleProtocolManager.instance();
+			iRODSProtocolManager.initialize();
+			iRODSFileSystem=new IRODSSession(iRODSProtocolManager);
+		} catch (JargonException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new IOException(e1.getMessage());
+		}
 		log.debug("JargonFileSystemImpl is checking map file in "+System.getProperty(FtpConstants.GRIFFIN_HOME));
 		if (getMapFile()!=null){
 			mapping=new HashMap<String,String>();
@@ -152,10 +167,22 @@ public class JargonFileSystemImpl implements FileSystem {
 
 	public String getSeparator() {
 		// TODO Auto-generated method stub
-		return String.valueOf(IRODSFile.PATH_SEPARATOR_CHAR);
+		return IRODSFile.PATH_SEPARATOR;
 	}
 
 	public void exit() {
+		try {
+			iRODSFileSystem.closeSession();
+		} catch (JargonException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			iRODSProtocolManager.destroy();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		log.debug("stopping update thread...");
 		updateThread.running=false;
 		updateThread.interrupt();
@@ -204,6 +231,10 @@ public class JargonFileSystemImpl implements FileSystem {
 				}
 		    }
 		}
+	}
+
+	public IRODSSession getIRODSFileSystem() {
+		return iRODSFileSystem;
 	}
 
 

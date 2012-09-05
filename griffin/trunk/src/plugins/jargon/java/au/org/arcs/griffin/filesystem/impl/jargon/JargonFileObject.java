@@ -24,22 +24,12 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.io.IRODSFile;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.filesystem.RandomAccessFileObject;
-import edu.sdsc.grid.io.GeneralFile;
-import edu.sdsc.grid.io.GeneralMetaData;
-import edu.sdsc.grid.io.MetaDataCondition;
-import edu.sdsc.grid.io.MetaDataRecordList;
-import edu.sdsc.grid.io.MetaDataSelect;
-import edu.sdsc.grid.io.MetaDataSet;
-import edu.sdsc.grid.io.Namespace;
-import edu.sdsc.grid.io.RemoteFile;
-import edu.sdsc.grid.io.RemoteFileSystem;
-import edu.sdsc.grid.io.irods.IRODSFile;
-import edu.sdsc.grid.io.irods.IRODSFileSystem;
-import edu.sdsc.grid.io.irods.IRODSMetaDataSet;
 
 /**
  * an implementation for jargon
@@ -48,7 +38,7 @@ import edu.sdsc.grid.io.irods.IRODSMetaDataSet;
 public class JargonFileObject implements FileObject {
 	private static Log          log                 = LogFactory.getLog(JargonFileObject.class);
 	
-    protected RemoteFile remoteFile = null;
+    protected IRODSFile remoteFile = null;
     protected JargonFileSystemConnectionImpl connection = null;
     protected String originalName;
 	public static final int JARGON_MAX_QUERY_NUM = 100000;
@@ -61,12 +51,16 @@ public class JargonFileObject implements FileObject {
      * @param path Path of file/directory.
      */
     public JargonFileObject(JargonFileSystemConnectionImpl aConnection,
-                            RemoteFileSystem rfs, String path) {
+                            String path) throws IOException{
         this.connection = aConnection;
-        if (rfs instanceof IRODSFileSystem) {
-            remoteFile = new IRODSFile((IRODSFileSystem) rfs, path);
-            this.originalName = path;
-        }
+        try {
+			remoteFile = aConnection.getFileFactory().instanceIRODSFile(path);
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
+        this.originalName = path;
     }
 
     /**
@@ -76,7 +70,7 @@ public class JargonFileObject implements FileObject {
      * @param file iRODS file object.
      */
     public JargonFileObject(JargonFileSystemConnectionImpl aConnection,
-                            RemoteFile file) {
+    		IRODSFile file) {
         this.connection = aConnection;
         this.remoteFile = file;
     }
@@ -145,152 +139,165 @@ public class JargonFileObject implements FileObject {
     public FileObject[] listFiles() throws IOException {
     	
 //        GeneralFile[] flist = remoteFile.listFiles();
-
-        MetaDataCondition conditionsFile[] = {
-				MetaDataSet.newCondition(GeneralMetaData.DIRECTORY_NAME, MetaDataCondition.EQUAL, remoteFile.getAbsolutePath()),
-//				MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_STATUS, MetaDataCondition.EQUAL, "1"),
-//				MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_NUM,	MetaDataCondition.EQUAL, 0),
-//				MetaDataSet.newCondition(IRODSMetaDataSet.USER_NAME, MetaDataCondition.EQUAL, ((IRODSFileSystem)file.getFileSystem()).getUserName()),
-			};
-			MetaDataSelect selectsFile[] = MetaDataSet.newSelection(new String[]{
-					IRODSMetaDataSet.FILE_NAME,
-					IRODSMetaDataSet.DIRECTORY_NAME,
-					IRODSMetaDataSet.CREATION_DATE,
-					IRODSMetaDataSet.MODIFICATION_DATE,
-					IRODSMetaDataSet.SIZE,
-					IRODSMetaDataSet.RESOURCE_NAME,
-					IRODSMetaDataSet.FILE_REPLICA_STATUS,
-//					IRODSMetaDataSet.META_DATA_ATTR_NAME,
-//					IRODSMetaDataSet.META_DATA_ATTR_VALUE,
-//					IRODSMetaDataSet.FILE_ACCESS_TYPE 
-				});
-			MetaDataCondition conditionsDir[] = {
-				MetaDataSet.newCondition(IRODSMetaDataSet.PARENT_DIRECTORY_NAME, MetaDataCondition.EQUAL, remoteFile.getAbsolutePath()),
-				MetaDataSet.newCondition(IRODSMetaDataSet.DIRECTORY_NAME, MetaDataCondition.NOT_EQUAL, remoteFile.getAbsolutePath()),
-	//##			MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_STATUS, MetaDataCondition.EQUAL, "1"),
-//				MetaDataSet.newCondition(IRODSMetaDataSet.DIRECTORY_USER_NAME, MetaDataCondition.EQUAL, ((IRODSFileSystem)file.getFileSystem()).getUserName()),
-			};
-			MetaDataSelect selectsDir[] = MetaDataSet.newSelection(new String[]{
-					IRODSMetaDataSet.DIRECTORY_NAME,
-					IRODSMetaDataSet.DIRECTORY_TYPE,
-					IRODSMetaDataSet.DIRECTORY_CREATE_DATE,
-					IRODSMetaDataSet.DIRECTORY_MODIFY_DATE,
-	//##				IRODSMetaDataSet.RESOURCE_NAME,
-//					IRODSMetaDataSet.META_COLL_ATTR_NAME,
-//					IRODSMetaDataSet.META_COLL_ATTR_VALUE,
-//					IRODSMetaDataSet.DIRECTORY_ACCESS_TYPE
-				});
-			Comparator<Object> comparator = new Comparator<Object>() {
-				public int compare(Object file1, Object file2) {
-					return (((GeneralFile)file1).getName().toLowerCase().compareTo(((GeneralFile)file2).getName().toLowerCase()));
-				}     			
-			};
-			try {
-				MetaDataRecordList[] fileDetails = ((IRODSFileSystem)remoteFile.getFileSystem()).query(conditionsFile, selectsFile, JARGON_MAX_QUERY_NUM);
-	    		MetaDataRecordList[] dirDetails = ((IRODSFileSystem)remoteFile.getFileSystem()).query(conditionsDir, selectsDir, JARGON_MAX_QUERY_NUM, Namespace.DIRECTORY);
-
-	    		if (fileDetails == null) fileDetails = new MetaDataRecordList[0];
-	    		if (dirDetails == null) dirDetails = new MetaDataRecordList[0];
-	    		Vector<CachedFile> fileList = new Vector<CachedFile>();
-//	    		Vector <CachedFile> dirList = new Vector();
-//	    		CachedFile[] files = new CachedFile[fileDetails.length];
-	    		CachedFile[] dirs = new CachedFile[dirDetails.length];
-	    		int i = 0;
-	    		log.debug("file num:"+fileDetails.length);
-	    		String lastName = null;
-	    		for (MetaDataRecordList p:fileDetails) {
-	    			CachedFile file = new CachedFile((RemoteFileSystem)remoteFile.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME), (String)p.getValue(IRODSMetaDataSet.FILE_NAME));
-	    			if (file.getName().equals(lastName)) {
-	    				if (p.getValue(IRODSMetaDataSet.FILE_REPLICA_STATUS).equals("1")) // Clean replica - replace previous replica in list
-	    					fileList.removeElementAt(fileList.size()-1);	// Delete last item so that this replica replaces it
-	    				else
-	    					continue;	// Dirty replica. Given we already have a dirty or clean replica, just discard it
-	    			}	
-	    			lastName = file.getName();
-	    			fileList.add(file);
-	    			file.setLastModified(Long.parseLong((String) p.getValue(IRODSMetaDataSet.MODIFICATION_DATE))*1000);
-	    			file.setLength(Long.parseLong((String)p.getValue(IRODSMetaDataSet.SIZE)));
-	    			file.setDirFlag(false);
-    				file.setCanWriteFlag(true);
-    				file.setCanReadFlag(true);
-//		    			files[i] = new CachedFile((RemoteFileSystem)collection.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME), (String)p.getValue(IRODSMetaDataSet.FILE_NAME));
-//		    			files[i].setLastModified(Long.parseLong((String) p.getValue(IRODSMetaDataSet.MODIFICATION_DATE))*1000);
-//		    			files[i].setLength(Long.parseLong((String)p.getValue(IRODSMetaDataSet.SIZE)));
-//		    			files[i].setDirFlag(false);
-//	    				files[i].setCanWriteFlag(true);
-	    			if (p.getValue(IRODSMetaDataSet.FILE_REPLICA_STATUS).equals("0")) {
-	    				String s = "";
-	    				if (file.length() == 0)
-	    					s = " (its length is 0)";
-	    				log.warn("Using a dirty copy of "+file.getAbsolutePath()+s);
-	    			}
-	    			i++;
-	    		}
-	    		CachedFile[] files = fileList.toArray(new CachedFile[0]);
-	    		Arrays.sort((Object[])files, comparator);
-	    		
-	    		log.debug("number of collections:"+dirDetails.length);
-	    		i = 0;
-	    		lastName = null;
-	    		for (MetaDataRecordList p:dirDetails) {
-//	    			CachedFile dir = new CachedFile((RemoteFileSystem)collection.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME));
-//	    			if (dir.getName().equals(lastName))
-//	    				continue;
-//	    			lastName = dir.getName();
-//	    			dirList.add(dir);
-//	    			dir.setLastModified(Long.parseLong((String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE))*1000);
-//	    			dir.setDirFlag(true);
-//	    			dir.setCanWriteFlag(true);
-	    			dirs[i] = new CachedFile((RemoteFileSystem)remoteFile.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME));
-	    			try {
-	    				dirs[i].setLastModified(Long.parseLong((String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE))*1000);
-	    			} catch (Exception e) {
-	    				log.error("failed to parse last modified time for "+dirs[i].getAbsolutePath()+": "+(String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE));
-	    				dirs[i].setLastModified(0);
-	    			}
-	    			dirs[i].setDirFlag(true);
-	    			dirs[i].setCanWriteFlag(true);
-	    			dirs[i].setCanReadFlag(true);
-	    			i++;
-	    		}
-//	    		CachedFile[] dirs = dirList.toArray(new CachedFile[0]);
-	    		Arrays.sort((Object[])dirs, comparator);
-	    		
-//	    		CachedFile[] detailList = new CachedFile[files.length+dirs.length];
-//	    		System.arraycopy(dirs, 0, detailList, 0, dirs.length);
-//	    		System.arraycopy(files, 0, detailList, dirs.length, files.length);
-
-	            FileObject[] list = new FileObject[files.length+dirs.length];
-//	            list[0] = this.connection.getFileObject(".");
-//	            list[1] = this.connection.getFileObject("..");
-	            
-	            for (int j = 0; j < files.length; j++) {
-	                list[j] = new JargonFileObject(this.connection,
-	                                                   (RemoteFile) files[j]);
-	            }
-	            for (int j = 0; j < dirs.length; j++) {
-	                list[j + files.length] = new JargonFileObject(this.connection,
-	                                                   (RemoteFile) dirs[j]);
-	            }
-
-	    		return list;
-			} catch (NullPointerException e) {
+    	
+    	String[] files=remoteFile.list();
+    	FileObject[] fileObjects=new FileObject[files.length];
+    	for (int i=0;i<files.length;i++){
+    		try {
+				fileObjects[i]=new JargonFileObject(connection, connection.getFileFactory().instanceIRODSFile(files[i]));
+			} catch (JargonException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new IOException(e.getMessage());
 			}
+    	}
+    	return fileObjects;
     	
-//        FileObject[] list = new FileObject[flist.length + 2];
-//        
-//        // Add two entries for current and parent directory.
-//        list[0] = this.connection.getFileObject(".");
-//        list[1] = this.connection.getFileObject("..");
-//        
-//        for (int i = 0; i < flist.length; i++) {
-//            list[i + 2] = new JargonFileObject(this.connection,
-//                                               (RemoteFile) flist[i]);
-//        }
-//        return list;
+//        MetaDataCondition conditionsFile[] = {
+//				MetaDataSet.newCondition(GeneralMetaData.DIRECTORY_NAME, MetaDataCondition.EQUAL, remoteFile.getAbsolutePath()),
+////				MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_STATUS, MetaDataCondition.EQUAL, "1"),
+////				MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_NUM,	MetaDataCondition.EQUAL, 0),
+////				MetaDataSet.newCondition(IRODSMetaDataSet.USER_NAME, MetaDataCondition.EQUAL, ((IRODSFileSystem)file.getFileSystem()).getUserName()),
+//			};
+//			MetaDataSelect selectsFile[] = MetaDataSet.newSelection(new String[]{
+//					IRODSMetaDataSet.FILE_NAME,
+//					IRODSMetaDataSet.DIRECTORY_NAME,
+//					IRODSMetaDataSet.CREATION_DATE,
+//					IRODSMetaDataSet.MODIFICATION_DATE,
+//					IRODSMetaDataSet.SIZE,
+//					IRODSMetaDataSet.RESOURCE_NAME,
+//					IRODSMetaDataSet.FILE_REPLICA_STATUS,
+////					IRODSMetaDataSet.META_DATA_ATTR_NAME,
+////					IRODSMetaDataSet.META_DATA_ATTR_VALUE,
+////					IRODSMetaDataSet.FILE_ACCESS_TYPE 
+//				});
+//			MetaDataCondition conditionsDir[] = {
+//				MetaDataSet.newCondition(IRODSMetaDataSet.PARENT_DIRECTORY_NAME, MetaDataCondition.EQUAL, remoteFile.getAbsolutePath()),
+//				MetaDataSet.newCondition(IRODSMetaDataSet.DIRECTORY_NAME, MetaDataCondition.NOT_EQUAL, remoteFile.getAbsolutePath()),
+//	//##			MetaDataSet.newCondition(IRODSMetaDataSet.FILE_REPLICA_STATUS, MetaDataCondition.EQUAL, "1"),
+////				MetaDataSet.newCondition(IRODSMetaDataSet.DIRECTORY_USER_NAME, MetaDataCondition.EQUAL, ((IRODSFileSystem)file.getFileSystem()).getUserName()),
+//			};
+//			MetaDataSelect selectsDir[] = MetaDataSet.newSelection(new String[]{
+//					IRODSMetaDataSet.DIRECTORY_NAME,
+//					IRODSMetaDataSet.DIRECTORY_TYPE,
+//					IRODSMetaDataSet.DIRECTORY_CREATE_DATE,
+//					IRODSMetaDataSet.DIRECTORY_MODIFY_DATE,
+//	//##				IRODSMetaDataSet.RESOURCE_NAME,
+////					IRODSMetaDataSet.META_COLL_ATTR_NAME,
+////					IRODSMetaDataSet.META_COLL_ATTR_VALUE,
+////					IRODSMetaDataSet.DIRECTORY_ACCESS_TYPE
+//				});
+//			Comparator<Object> comparator = new Comparator<Object>() {
+//				public int compare(Object file1, Object file2) {
+//					return (((GeneralFile)file1).getName().toLowerCase().compareTo(((GeneralFile)file2).getName().toLowerCase()));
+//				}     			
+//			};
+//			try {
+//				MetaDataRecordList[] fileDetails = ((IRODSFileSystem)remoteFile.getFileSystem()).query(conditionsFile, selectsFile, JARGON_MAX_QUERY_NUM);
+//	    		MetaDataRecordList[] dirDetails = ((IRODSFileSystem)remoteFile.getFileSystem()).query(conditionsDir, selectsDir, JARGON_MAX_QUERY_NUM, Namespace.DIRECTORY);
+//
+//	    		if (fileDetails == null) fileDetails = new MetaDataRecordList[0];
+//	    		if (dirDetails == null) dirDetails = new MetaDataRecordList[0];
+//	    		Vector<CachedFile> fileList = new Vector<CachedFile>();
+////	    		Vector <CachedFile> dirList = new Vector();
+////	    		CachedFile[] files = new CachedFile[fileDetails.length];
+//	    		CachedFile[] dirs = new CachedFile[dirDetails.length];
+//	    		int i = 0;
+//	    		log.debug("file num:"+fileDetails.length);
+//	    		String lastName = null;
+//	    		for (MetaDataRecordList p:fileDetails) {
+//	    			CachedFile file = new CachedFile((RemoteFileSystem)remoteFile.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME), (String)p.getValue(IRODSMetaDataSet.FILE_NAME));
+//	    			if (file.getName().equals(lastName)) {
+//	    				if (p.getValue(IRODSMetaDataSet.FILE_REPLICA_STATUS).equals("1")) // Clean replica - replace previous replica in list
+//	    					fileList.removeElementAt(fileList.size()-1);	// Delete last item so that this replica replaces it
+//	    				else
+//	    					continue;	// Dirty replica. Given we already have a dirty or clean replica, just discard it
+//	    			}	
+//	    			lastName = file.getName();
+//	    			fileList.add(file);
+//	    			file.setLastModified(Long.parseLong((String) p.getValue(IRODSMetaDataSet.MODIFICATION_DATE))*1000);
+//	    			file.setLength(Long.parseLong((String)p.getValue(IRODSMetaDataSet.SIZE)));
+//	    			file.setDirFlag(false);
+//    				file.setCanWriteFlag(true);
+//    				file.setCanReadFlag(true);
+////		    			files[i] = new CachedFile((RemoteFileSystem)collection.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME), (String)p.getValue(IRODSMetaDataSet.FILE_NAME));
+////		    			files[i].setLastModified(Long.parseLong((String) p.getValue(IRODSMetaDataSet.MODIFICATION_DATE))*1000);
+////		    			files[i].setLength(Long.parseLong((String)p.getValue(IRODSMetaDataSet.SIZE)));
+////		    			files[i].setDirFlag(false);
+////	    				files[i].setCanWriteFlag(true);
+//	    			if (p.getValue(IRODSMetaDataSet.FILE_REPLICA_STATUS).equals("0")) {
+//	    				String s = "";
+//	    				if (file.length() == 0)
+//	    					s = " (its length is 0)";
+//	    				log.warn("Using a dirty copy of "+file.getAbsolutePath()+s);
+//	    			}
+//	    			i++;
+//	    		}
+//	    		CachedFile[] files = fileList.toArray(new CachedFile[0]);
+//	    		Arrays.sort((Object[])files, comparator);
+//	    		
+//	    		log.debug("number of collections:"+dirDetails.length);
+//	    		i = 0;
+//	    		lastName = null;
+//	    		for (MetaDataRecordList p:dirDetails) {
+////	    			CachedFile dir = new CachedFile((RemoteFileSystem)collection.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME));
+////	    			if (dir.getName().equals(lastName))
+////	    				continue;
+////	    			lastName = dir.getName();
+////	    			dirList.add(dir);
+////	    			dir.setLastModified(Long.parseLong((String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE))*1000);
+////	    			dir.setDirFlag(true);
+////	    			dir.setCanWriteFlag(true);
+//	    			dirs[i] = new CachedFile((RemoteFileSystem)remoteFile.getFileSystem(), (String)p.getValue(IRODSMetaDataSet.DIRECTORY_NAME));
+//	    			try {
+//	    				dirs[i].setLastModified(Long.parseLong((String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE))*1000);
+//	    			} catch (Exception e) {
+//	    				log.error("failed to parse last modified time for "+dirs[i].getAbsolutePath()+": "+(String)p.getValue(IRODSMetaDataSet.DIRECTORY_MODIFY_DATE));
+//	    				dirs[i].setLastModified(0);
+//	    			}
+//	    			dirs[i].setDirFlag(true);
+//	    			dirs[i].setCanWriteFlag(true);
+//	    			dirs[i].setCanReadFlag(true);
+//	    			i++;
+//	    		}
+////	    		CachedFile[] dirs = dirList.toArray(new CachedFile[0]);
+//	    		Arrays.sort((Object[])dirs, comparator);
+//	    		
+////	    		CachedFile[] detailList = new CachedFile[files.length+dirs.length];
+////	    		System.arraycopy(dirs, 0, detailList, 0, dirs.length);
+////	    		System.arraycopy(files, 0, detailList, dirs.length, files.length);
+//
+//	            FileObject[] list = new FileObject[files.length+dirs.length];
+////	            list[0] = this.connection.getFileObject(".");
+////	            list[1] = this.connection.getFileObject("..");
+//	            
+//	            for (int j = 0; j < files.length; j++) {
+//	                list[j] = new JargonFileObject(this.connection,
+//	                                                   (RemoteFile) files[j]);
+//	            }
+//	            for (int j = 0; j < dirs.length; j++) {
+//	                list[j + files.length] = new JargonFileObject(this.connection,
+//	                                                   (RemoteFile) dirs[j]);
+//	            }
+//
+//	    		return list;
+//			} catch (NullPointerException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				throw new IOException(e.getMessage());
+//			}
+//    	
+////        FileObject[] list = new FileObject[flist.length + 2];
+////        
+////        // Add two entries for current and parent directory.
+////        list[0] = this.connection.getFileObject(".");
+////        list[1] = this.connection.getFileObject("..");
+////        
+////        for (int i = 0; i < flist.length; i++) {
+////            list[i + 2] = new JargonFileObject(this.connection,
+////                                               (RemoteFile) flist[i]);
+////        }
+////        return list;
     }
 
    /**
@@ -312,7 +319,7 @@ public class JargonFileObject implements FileObject {
      */
     public RandomAccessFileObject getRandomAccessFileObject(String type)
             throws IOException {
-        return new JargonRandomAccessFileObjectImpl(remoteFile, type);
+        return new JargonRandomAccessFileObjectImpl(connection, remoteFile, type);
     }
 
     /**
@@ -324,10 +331,17 @@ public class JargonFileObject implements FileObject {
 
     /**
      * {@inheritDoc}
+     * @throws IOException 
      */
     public FileObject getParent() {
-        return new JargonFileObject(this.connection,
-                                    (RemoteFile) remoteFile.getParentFile());
+        try {
+			return new JargonFileObject(this.connection,
+			                            remoteFile.getParent());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
     }
 
     /**
@@ -360,7 +374,7 @@ public class JargonFileObject implements FileObject {
      * 
      * @return Reference to the iRODS file object.
      */
-    public RemoteFile getRemoteFile() {
+    public IRODSFile getRemoteFile() {
         return remoteFile;
     }
 }

@@ -21,12 +21,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.ietf.jgss.GSSCredential;
+import org.irods.jargon.core.connection.IRODSAccount;
+import org.irods.jargon.core.connection.IRODSCommands;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.io.IRODSFileFactory;
+import org.irods.jargon.core.pub.io.IRODSFileFactoryImpl;
 
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.filesystem.FileSystemConnection;
-import edu.sdsc.grid.io.RemoteFileSystem;
-import edu.sdsc.grid.io.irods.IRODSAccount;
-import edu.sdsc.grid.io.irods.IRODSFileSystem;
 
 /**
  * An implementation for Jargon.
@@ -35,9 +37,11 @@ import edu.sdsc.grid.io.irods.IRODSFileSystem;
 public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 
     private static Log log = LogFactory.getLog(JargonFileSystemConnectionImpl.class);
-    private RemoteFileSystem remoteFileSystem;
+    private IRODSFileFactory fileFactory;
+    private IRODSAccount account;
     private String user;
     private String homeCollection;
+    private JargonFileSystemImpl jargonFileSystem;
 
     /**
      * Constructor.
@@ -50,22 +54,30 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * @throws NullPointerException On configuration problems. 
      * @throws IOException On access problems. 
      */
-    public JargonFileSystemConnectionImpl(String serverName, int serverPort,
+    public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
                                           String serverType,
                                           GSSCredential credential,
                                           String defaultResource)
                 throws NullPointerException, IOException {
+    	this.jargonFileSystem=jargonFileSystem;
         if (serverType.equalsIgnoreCase("irods")) {
             log.debug("server:" + serverName + " serverPort:" + serverPort
                     + " credential:" + credential.toString());
-            IRODSAccount account = new IRODSAccount(serverName, serverPort,
+            account = IRODSAccount.instance(serverName, serverPort,
                                                     credential);
-            if (defaultResource != null) {
-                account.setDefaultStorageResource(defaultResource);
-            }
-            remoteFileSystem = new IRODSFileSystem(account);
-            user = account.getUserName();
-            homeCollection = account.getHomeDirectory();
+//            if (defaultResource != null) {
+//                account.setDefaultStorageResource(defaultResource);
+//            }
+            try {
+//            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
+				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+	            user = account.getUserName();
+	            homeCollection = account.getHomeDirectory();
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
         }
     }
 
@@ -82,28 +94,40 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * @throws NullPointerException On configuration problems. 
      * @throws IOException On access problems.
      */
-    public JargonFileSystemConnectionImpl(String serverName, int serverPort,
+    public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
                                           String serverType, String username,
                                           String zoneName,
                                           GSSCredential credential,
                                           String defaultResource)
                 throws NullPointerException, IOException {
+    	this.jargonFileSystem=jargonFileSystem;
         if (serverType.equalsIgnoreCase("irods")) {
             log.debug("server:" + serverName + " serverPort:" + serverPort
                     + " user: " + username + "@" + zoneName + " credential:"
                     + credential.toString());
-            IRODSAccount account = new IRODSAccount(serverName, serverPort,
-                                                    username, "",
-                                                    "/" + zoneName
-                                                    + "/home/" + username,
-                                                    zoneName, "");
+            try {
+				account = IRODSAccount.instance(serverName, serverPort,
+														credential, 
+				                                        "/" + zoneName
+				                                        + "/home/" + username,
+				                                        defaultResource);
+			} catch (JargonException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				throw new IOException(e1.getMessage());
+			}
             if (defaultResource != null) {
                 account.setDefaultStorageResource(defaultResource);
             }
-            account.setGSSCredential(credential);
-            remoteFileSystem = new IRODSFileSystem(account);
-            user = account.getUserName();
-            homeCollection = account.getHomeDirectory();
+            try {
+				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+	            user = account.getUserName();
+	            homeCollection = account.getHomeDirectory();
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
         }
     }
 
@@ -111,7 +135,13 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * {@inheritDoc}
      */
     public FileObject getFileObject(String path) {
-        return new JargonFileObject(this, remoteFileSystem, path);
+        try {
+			return new JargonFileObject(this, path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
     }
 
     /**
@@ -132,12 +162,16 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * {@inheritDoc}
      */
     public void close() throws IOException {
-        if (remoteFileSystem != null) {
-            if (remoteFileSystem instanceof IRODSFileSystem) {
-                log.debug("closing irods connecton:" + remoteFileSystem);
-                ((IRODSFileSystem) remoteFileSystem).close();
-                remoteFileSystem = null;
-            }
+        if (fileFactory != null) {
+            log.debug("closing irods connecton:" + fileFactory);
+            try {
+				this.jargonFileSystem.getIRODSFileSystem().closeSession(this.account);
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
+            fileFactory = null;
         }
 
     }
@@ -146,7 +180,13 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * {@inheritDoc}
      */
     public boolean isConnected() {
-        return remoteFileSystem.isConnected();
+        try {
+			return jargonFileSystem.getIRODSFileSystem().currentConnection(account).isConnected();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
     }
 
     /**
@@ -155,4 +195,9 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
     public long getFreeSpace(String path) {
         return -1;
     }
+
+	public IRODSFileFactory getFileFactory() {
+		return fileFactory;
+	}
+    
 }
