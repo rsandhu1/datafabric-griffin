@@ -66,8 +66,9 @@
     	      <include name="**/*.config"/>
       	      <include name="app.properties"/>
         	  <include name="griffin-resources.properties"/>
-    	    </fileset>
-    	  </copy>
+        	  <include name="sftpirods-res.properties"/>
+			</fileset>
+    	</copy>
     </target>
 
     <target name="jar" depends="clean, compile">
