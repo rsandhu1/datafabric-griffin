@@ -16,5 +16,6 @@ public interface FileSystem {
 	public String getSeparator();
 	public void init() throws IOException;
 	public FileSystemConnection createFileSystemConnection(GSSCredential credential) throws FtpConfigException, IOException;
+	public FileSystemConnection createFileSystemConnection(String username, String password) throws FtpConfigException, IOException;
 	public void exit();
 }

@@ -58,6 +58,11 @@ public class FtpCmdUserGSI extends AbstractFtpCmd {
             msgOut(MSG501);
             return;
         }
+        if (getCtx().getControlChannelMode()==1){
+        	getCtx().setUser(getArguments());
+            msgOut(MSG230_GSI_USER, getArguments());
+            return;
+        }
         if (getCtx().getServiceContext() == null
                 || !getCtx().getServiceContext().isEstablished()) {
             msgOut(MSG503_ENC);

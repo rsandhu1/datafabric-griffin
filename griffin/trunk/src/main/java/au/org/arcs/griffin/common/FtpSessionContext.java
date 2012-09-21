@@ -410,4 +410,8 @@ public interface FtpSessionContext {
     void setDCAU(int dcauType);
     
     TransferMonitor getTransferMonitor();
+    
+    // 0: GridFTP; 1: SSH
+    int getControlChannelMode();
+    void setControlChannelMode(int mode);
 }
