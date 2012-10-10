@@ -90,7 +90,7 @@ public class TCPDataChannel implements DataChannel {
 	public DataChannelInfo init() throws IOException {
 		if (dataChannelInfo==null){ //passive
 	        /* Get local machine address and check protocol version. */
-	        InetAddress localIp = ctx.getClientSocket().getLocalAddress();
+	        InetAddress localIp = ctx.getLocalInetAddress();
 //	        int currentProtocol = getProtocolIdxByAddr(localIp);
 //	        boolean ok = (preferredProtocol == currentProtocol) || (preferredProtocol == 0);
 //	        if (!ok) {

@@ -180,6 +180,7 @@
 		<property name="options" ref="options" />
 		<property name="resources" value="griffin-resources"/>
 		<property name="fileSystem" ref="fileSystem" />
+		<property name="ftpEventListener" ref="server" />
 	</bean>
 	
 	<bean id="server" class="au.org.arcs.griffin.server.impl.GsiFtpServer" singleton="true">

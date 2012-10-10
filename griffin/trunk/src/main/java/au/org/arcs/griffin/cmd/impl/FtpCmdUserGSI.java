@@ -87,7 +87,7 @@ public class FtpCmdUserGSI extends AbstractFtpCmd {
                 msgOut(MSG530_AUTH_GSI_USER, new String[] {e.getMessage()});
                 return;
             }
-            String clientHost = getCtx().getClientSocket().getInetAddress()
+            String clientHost = getCtx().getClientInetAddress()
                                         .getHostAddress();
             getCtx().getEventListener()
                     .loginPerformed(clientHost, getCtx().isAuthenticated());

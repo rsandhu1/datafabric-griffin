@@ -27,6 +27,7 @@ package au.org.arcs.griffin.common;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Map;
@@ -414,4 +415,11 @@ public interface FtpSessionContext {
     // 0: GridFTP; 1: SSH
     int getControlChannelMode();
     void setControlChannelMode(int mode);
+    
+    InetAddress getClientInetAddress();
+    void setClientInetAddress(InetAddress clientInetAddress);
+    
+	InetAddress getLocalInetAddress();
+	void setLocalInetAddress(InetAddress localInetAddress);
+
 }

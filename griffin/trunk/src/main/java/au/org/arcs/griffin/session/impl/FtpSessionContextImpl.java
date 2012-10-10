@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.Date;
@@ -140,6 +141,8 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
     private TransferMonitor transferMonitor;
     
     private int controlChannelMode;
+    private InetAddress clientInetAddress;
+    private InetAddress localInetAddress;
 
     /**
      * Constructor.
@@ -829,4 +832,24 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
 		this.controlChannelMode=mode;
 		this.authenticated=true;
 	}
+
+	public InetAddress getClientInetAddress() {
+		if (this.clientSocket!=null) return clientSocket.getInetAddress();
+		return clientInetAddress;
+	}
+
+	public void setClientInetAddress(InetAddress clientInetAddress) {
+		this.clientInetAddress = clientInetAddress;
+	}
+
+	public InetAddress getLocalInetAddress() {
+		if (this.clientSocket!=null) return clientSocket.getLocalAddress();
+		return localInetAddress;
+	}
+
+	public void setLocalInetAddress(InetAddress localInetAddress) {
+		this.localInetAddress = localInetAddress;
+	}
+	
+	
 }

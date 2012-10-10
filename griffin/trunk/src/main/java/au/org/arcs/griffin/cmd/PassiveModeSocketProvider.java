@@ -83,7 +83,7 @@ public class PassiveModeSocketProvider implements SocketProvider {
     public DataChannelInfo init() throws IOException {
 
         /* Get local machine address and check protocol version. */
-        InetAddress localIp = ctx.getClientSocket().getLocalAddress();
+        InetAddress localIp = ctx.getLocalInetAddress();
         int currentProtocol = getProtocolIdxByAddr(localIp);
         boolean ok = (preferredProtocol == currentProtocol) || (preferredProtocol == 0);
         if (!ok) {

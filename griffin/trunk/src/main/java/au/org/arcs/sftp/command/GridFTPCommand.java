@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import au.org.arcs.griffin.cmd.FtpCmd;
 import au.org.arcs.griffin.common.FtpConstants;
+import au.org.arcs.griffin.common.FtpEventListener;
 import au.org.arcs.griffin.common.FtpServerOptions;
 import au.org.arcs.griffin.common.FtpSessionContext;
 import au.org.arcs.griffin.exception.FtpCmdException;
@@ -31,7 +34,7 @@ import au.org.arcs.griffin.filesystem.FileSystem;
 import au.org.arcs.griffin.parser.FtpCmdReader;
 import au.org.arcs.sftp.SftpServerSession;
 
-public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionAware, FileSystemAware{
+public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionAware, FileSystemAware {
 	protected static final Logger log = LoggerFactory.getLogger(GridFTPCommand.class);
     protected static final int OK = 0;
     protected static final int WARNING = 1;
@@ -55,6 +58,7 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
     private FtpServerOptions options;
     private String resources;
     private FileSystem fileSystem;
+    private FtpEventListener ftpEventListener;
     
     public GridFTPCommand(String args) {
     	if (args==null||args.length()==0){
@@ -94,12 +98,13 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
 
     public void run() {
     	log.debug("serverSession:"+serverSession);
+    	log.debug("serverSession client:"+serverSession.getIoSession().getRemoteAddress().getClass());
     	log.debug("root:"+root);
 		SftpServerSession session=(SftpServerSession)serverSession;
 		log.debug("local address: "+serverSession.getIoSession().getLocalAddress());
 		log.debug("remote address: "+serverSession.getIoSession().getRemoteAddress());
 		FtpSessionContext ctx=new SSHFtpSessionContextImpl(options, fileSystem, ResourceBundle
-	            .getBundle(getResources()), null);
+	            .getBundle(getResources()), ftpEventListener);
         ctx.setCreationTime(new Date());
         // set default reply type to be clear
         ctx.setReplyType("clear");
@@ -110,6 +115,8 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
         ctx.setBufferSize(options.getBufferSize());
         ctx.setNetworkStack(NETWORK_STACK_TCP);
         ctx.setDCAU(DCAU_NONE);
+        ctx.setClientInetAddress(((InetSocketAddress)serverSession.getIoSession().getRemoteAddress()).getAddress());
+        ctx.setLocalInetAddress(((InetSocketAddress)serverSession.getIoSession().getLocalAddress()).getAddress());
     	this.ftpContext=ctx;
     	
         int exitValue = OK;
@@ -260,5 +267,11 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
 	}
 	public void setFileSystem(FileSystem fileSystem) {
 		this.fileSystem = fileSystem;
+	}
+	public FtpEventListener getFtpEventListener() {
+		return ftpEventListener;
+	}
+	public void setFtpEventListener(FtpEventListener ftpEventListener) {
+		this.ftpEventListener = ftpEventListener;
 	}
 }

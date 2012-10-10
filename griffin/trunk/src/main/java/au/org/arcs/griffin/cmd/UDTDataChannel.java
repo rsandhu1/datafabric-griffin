@@ -79,7 +79,7 @@ public class UDTDataChannel implements DataChannel {
 
 	public DataChannelInfo init() throws IOException {
         /* Get local machine address and check protocol version. */
-        InetAddress localIp = ctx.getClientSocket().getLocalAddress();
+        InetAddress localIp = ctx.getLocalInetAddress();
         log.debug("localIp:"+localIp);
         
         /* Get the next available port */
