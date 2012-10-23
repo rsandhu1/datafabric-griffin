@@ -44,6 +44,15 @@ public class JargonFileSystemImpl implements FileSystem {
 	private int updateInterval;
 	private IRODSSession iRODSFileSystem;
 	private IRODSProtocolManager iRODSProtocolManager;
+	private String zoneName;
+	
+	public String getZoneName() {
+		return zoneName;
+	}
+
+	public void setZoneName(String zoneName) {
+		this.zoneName = zoneName;
+	}
 	
 	public int getUpdateInterval() {
 		return updateInterval;
@@ -237,5 +246,17 @@ public class JargonFileSystemImpl implements FileSystem {
 		return iRODSFileSystem;
 	}
 
+	@Override
+	public FileSystemConnection createFileSystemConnection(String username,
+			String password) throws FtpConfigException, IOException {
+		// TODO Auto-generated method stub
+		try {
+			FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, username, password, "", defaultResource);
+			return connection;
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			throw new FtpConfigException(e.getMessage());
+		}
+	}
 
 }

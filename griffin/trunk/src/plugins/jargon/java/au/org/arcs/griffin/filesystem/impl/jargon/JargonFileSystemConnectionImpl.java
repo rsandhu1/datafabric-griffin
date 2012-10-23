@@ -131,6 +131,37 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
         }
     }
 
+    public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
+            String serverType, String username, String password,
+            String zoneName,
+            String defaultResource)
+				throws NullPointerException, IOException {
+    	this.jargonFileSystem=jargonFileSystem;
+		if (serverType.equalsIgnoreCase("irods")) {
+			log.debug("server:" + serverName + " serverPort:" + serverPort
+				+ " user: " + username + "@" + zoneName + " password:"
+				 );
+			account = new IRODSAccount(serverName, serverPort,
+										username, password,
+				                      "/" + zoneName
+				                      + "/home/" + username,
+				                      zoneName, "");
+			if (defaultResource != null) {
+				account.setDefaultStorageResource(defaultResource);
+			}
+            try {
+				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+	            user = account.getUserName();
+	            homeCollection = account.getHomeDirectory();
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
+		}
+	}
+
+    
     /**
      * {@inheritDoc}
      */
