@@ -194,9 +194,9 @@
 	<bean id="fileSystem" class="au.org.arcs.griffin.filesystem.impl.jargon.JargonFileSystemImpl" singleton="true">
 		<property name="serverName" value="localhost" />
 		<property name="serverPort" value="1247" />
-		<property name="serverType" value="irods" />
 		<property name="zoneName" value="testZone" />
-				<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
+		<property name="defaultAuthType" value="pam" />
+						<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
 		<!-- 
 		<property name="mapFile" value="irods-mapfile" />
 		 -->

@@ -36,7 +36,7 @@ public class JargonFileSystemImpl implements FileSystem {
 	private static Log log = LogFactory.getLog(JargonFileSystemImpl.class);
 	private String serverName;
 	private int serverPort;
-	private String serverType;
+	private String defaultAuthType;
 	private String mapFile;
 	private Map<String,String> mapping;
 	private String defaultResource;
@@ -78,14 +78,6 @@ public class JargonFileSystemImpl implements FileSystem {
 		this.mapFile = mapFile;
 	}
 
-	public String getServerType() {
-		return serverType;
-	}
-
-	public void setServerType(String serverType) {
-		this.serverType = serverType;
-	}
-
 	public String getServerName() {
 		return serverName;
 	}
@@ -102,11 +94,19 @@ public class JargonFileSystemImpl implements FileSystem {
 		this.serverPort = serverPort;
 	}
 
+	public String getDefaultAuthType() {
+		return defaultAuthType;
+	}
+
+	public void setDefaultAuthType(String defaultAuthType) {
+		this.defaultAuthType = defaultAuthType;
+	}
+
 	public FileSystemConnection createFileSystemConnection(
 			GSSCredential credential) throws FtpConfigException, IOException{
 		if (mapping==null){
 			try {
-				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, credential, defaultResource);
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, credential, defaultResource);
 				return connection;
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
@@ -117,7 +117,7 @@ public class JargonFileSystemImpl implements FileSystem {
 				String user=mapping.get(credential.getName().toString());
 				if (user==null) throw new FtpConfigException("User DN \""+credential.getName().toString()+"\" is not found in mapfile.");
 				if (user.indexOf("@")<0||user.split("@").length!=2) throw new FtpConfigException("Username in mapfile should be in form username@zone_name.");
-				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, user.split("@")[0], user.split("@")[1], credential, defaultResource);
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, user.split("@")[0], user.split("@")[1], credential, defaultResource);
 				return connection;
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
@@ -251,7 +251,8 @@ public class JargonFileSystemImpl implements FileSystem {
 			String password) throws FtpConfigException, IOException {
 		// TODO Auto-generated method stub
 		try {
-			FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, serverType, username, password, "", defaultResource);
+			if (defaultAuthType==null) defaultAuthType="irods";
+			FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, defaultAuthType, username, password, zoneName, defaultResource);
 			return connection;
 		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block

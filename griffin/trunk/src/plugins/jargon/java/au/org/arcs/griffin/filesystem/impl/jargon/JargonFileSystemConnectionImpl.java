@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSCommands;
+import org.irods.jargon.core.connection.IRODSAccount.AuthScheme;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
 import org.irods.jargon.core.pub.io.IRODSFileFactoryImpl;
@@ -55,30 +56,27 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * @throws IOException On access problems. 
      */
     public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
-                                          String serverType,
                                           GSSCredential credential,
                                           String defaultResource)
                 throws NullPointerException, IOException {
     	this.jargonFileSystem=jargonFileSystem;
-        if (serverType.equalsIgnoreCase("irods")) {
-            log.debug("server:" + serverName + " serverPort:" + serverPort
-                    + " credential:" + credential.toString());
-            account = IRODSAccount.instance(serverName, serverPort,
-                                                    credential);
+        log.debug("server:" + serverName + " serverPort:" + serverPort
+                + " credential:" + credential.toString());
+        account = IRODSAccount.instance(serverName, serverPort,
+                                                credential);
 //            if (defaultResource != null) {
 //                account.setDefaultStorageResource(defaultResource);
 //            }
-            try {
+        try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
-				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
-	            user = account.getUserName();
-	            homeCollection = account.getHomeDirectory();
-			} catch (JargonException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IOException(e.getMessage());
-			}
-        }
+			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+            user = account.getUserName();
+            homeCollection = account.getHomeDirectory();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
     }
 
     /**
@@ -95,69 +93,74 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * @throws IOException On access problems.
      */
     public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
-                                          String serverType, String username,
-                                          String zoneName,
+                                          String username,String zoneName,
                                           GSSCredential credential,
                                           String defaultResource)
                 throws NullPointerException, IOException {
     	this.jargonFileSystem=jargonFileSystem;
-        if (serverType.equalsIgnoreCase("irods")) {
-            log.debug("server:" + serverName + " serverPort:" + serverPort
-                    + " user: " + username + "@" + zoneName + " credential:"
-                    + credential.toString());
-            try {
-				account = IRODSAccount.instance(serverName, serverPort,
-														credential, 
-				                                        "/" + zoneName
-				                                        + "/home/" + username,
-				                                        defaultResource);
-			} catch (JargonException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				throw new IOException(e1.getMessage());
-			}
-            if (defaultResource != null) {
-                account.setDefaultStorageResource(defaultResource);
-            }
-            try {
-				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
-	            user = account.getUserName();
-	            homeCollection = account.getHomeDirectory();
-			} catch (JargonException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IOException(e.getMessage());
-			}
+        log.debug("server:" + serverName + " serverPort:" + serverPort
+                + " user: " + username + "@" + zoneName + " credential:"
+                + credential.toString());
+        try {
+			account = IRODSAccount.instance(serverName, serverPort,
+													credential, 
+			                                        "/" + zoneName
+			                                        + "/home/" + username,
+			                                        defaultResource);
+		} catch (JargonException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new IOException(e1.getMessage());
+		}
+        if (defaultResource != null) {
+            account.setDefaultStorageResource(defaultResource);
         }
+        try {
+			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+            user = account.getUserName();
+            homeCollection = account.getHomeDirectory();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
     }
 
     public JargonFileSystemConnectionImpl(JargonFileSystemImpl jargonFileSystem, String serverName, int serverPort,
-            String serverType, String username, String password,
+            String defaultAuthType, String username, String password,
             String zoneName,
             String defaultResource)
 				throws NullPointerException, IOException {
     	this.jargonFileSystem=jargonFileSystem;
-		if (serverType.equalsIgnoreCase("irods")) {
-			log.debug("server:" + serverName + " serverPort:" + serverPort
-				+ " user: " + username + "@" + zoneName + " password:"
+		String authType=defaultAuthType;
+		if (username.indexOf('\\')>-1){
+			authType=username.substring(0,username.indexOf('\\'));
+			username=username.substring(username.indexOf('\\')+1);
+		} else if (username.indexOf('/')>-1) {
+			authType=username.substring(0,username.indexOf('/'));
+			username=username.substring(username.indexOf('/')+1);
+		}
+		log.debug("server:" + serverName + " serverPort:" + serverPort
+				+ " user: " + username + "@" + zoneName + " authType:" + authType
 				 );
-			account = new IRODSAccount(serverName, serverPort,
-										username, password,
-				                      "/" + zoneName
-				                      + "/home/" + username,
-				                      zoneName, "");
-			if (defaultResource != null) {
-				account.setDefaultStorageResource(defaultResource);
-			}
-            try {
-				fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
-	            user = account.getUserName();
-	            homeCollection = account.getHomeDirectory();
-			} catch (JargonException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IOException(e.getMessage());
-			}
+		account = new IRODSAccount(serverName, serverPort,
+									username, password,
+			                      "/" + zoneName
+			                      + "/home/" + username,
+			                      zoneName, "");
+    	if (authType.equalsIgnoreCase("pam")) 
+    		account.setAuthenticationScheme(AuthScheme.PAM);
+		if (defaultResource != null) {
+			account.setDefaultStorageResource(defaultResource);
+		}
+        try {
+			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+            user = account.getUserName();
+            homeCollection = account.getHomeDirectory();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
 		}
 	}
 
