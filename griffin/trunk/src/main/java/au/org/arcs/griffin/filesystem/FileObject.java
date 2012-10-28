@@ -71,4 +71,8 @@ public interface FileObject {
     public boolean renameTo(FileObject aFile);
 
     public boolean setLastModified(long t);
+    
+    public boolean create();
+    
+    public String getOwner();
 }

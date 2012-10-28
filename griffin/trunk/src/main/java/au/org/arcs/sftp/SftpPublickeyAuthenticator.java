@@ -18,10 +18,17 @@
  */
 package au.org.arcs.sftp;
 
+import java.io.UnsupportedEncodingException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 
+import org.apache.mina.util.Base64;
 import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
 * Implements <code>PublickeyAuthenticator</code> to skip Public Key Authentication check. Always fails!
@@ -30,6 +37,8 @@ import org.apache.sshd.server.session.ServerSession;
  */
 public class SftpPublickeyAuthenticator implements PublickeyAuthenticator
 {
+	private final Logger		log	= LoggerFactory.getLogger(getClass());
+
 	private SftpServerDetails	server_details;
 
 	public SftpPublickeyAuthenticator(SftpServerDetails serverDetails)
@@ -55,6 +64,20 @@ public class SftpPublickeyAuthenticator implements PublickeyAuthenticator
 
 	public boolean authenticate(String username, PublicKey key, ServerSession session)
 	{
+		log.debug("username:"+username+" is logging in with a key...");
+//		log.debug("key: "+key.getClass()+" "+key.toString());
+		byte[] encoded=key.getEncoded();
+		log.debug("encoded: "+encoded.length);
+//		if (encoded==null) {
+//			log.warn("public key is empty.");
+//			return false;
+//		}
+		byte[] keyString=Base64.encodeBase64(encoded);
+		log.debug("keyString: "+keyString);
+//		if (key instanceof RSAPublicKey) {
+//			byte[] keyString=Base64.decode(encoded);
+//			log.debug("keyString: "+new String(keyString));
+//		}
 		// File f = new File("/Users/" + username + "/.ssh/authorized_keys");
 		// return true;
 		return false; // We are only using UN/PW entry via Globus

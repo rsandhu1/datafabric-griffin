@@ -377,4 +377,22 @@ public class JargonFileObject implements FileObject {
     public IRODSFile getRemoteFile() {
         return remoteFile;
     }
+
+	@Override
+	public boolean create() {
+		// TODO Auto-generated method stub
+		try {
+			return remoteFile.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public String getOwner() {
+		// TODO Auto-generated method stub
+		return connection.getUser();
+	}
 }

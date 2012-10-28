@@ -42,6 +42,7 @@ import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.ServerFactoryManager;
 import org.apache.sshd.server.command.ScpCommandFactory;
+import org.apache.sshd.server.sftp.SftpSubsystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -55,6 +56,7 @@ import au.org.arcs.griffin.utils.LoggingOutputStream;
 import au.org.arcs.griffin.utils.NetUtils;
 import au.org.arcs.griffin.utils.SecurityUtil;
 import au.org.arcs.sftp.command.GridFTPCommandFactory;
+import au.org.arcs.sftp.filesystem.GriffinFileSystemFactory;
 //import au.org.arcs.sftp.SftpSubsystem;
 import au.org.arcs.sftp.utils.SftpLog;
 import au.org.arcs.sftp.SftpForwardingFilter;
@@ -349,11 +351,11 @@ public final class FtpServerStarter {
 		}
 		*/
 		// Out own file handlers
-//		sshd.setFileSystemFactory(new GriffinFileSystemFactory());
+		sshd.setFileSystemFactory(new GriffinFileSystemFactory());
 		// Make our own derived sessions
 		sshd.setSessionFactory(new SftpSessionFactory());
 		// Make our own SFTP subsystem handler
-//		sshd.setSubsystemFactories(Arrays.<NamedFactory<Command>> asList(new SftpSubsystem.Factory()));// ,
+		sshd.setSubsystemFactories(Arrays.<NamedFactory<Command>> asList(new SftpSubsystem.Factory()));// ,
 		// Set default ScpCommandFactory
 		sshd.setCommandFactory(new ScpCommandFactory(new GridFTPCommandFactory(appContext)));
 		// Make our own Password Authenticator handler
