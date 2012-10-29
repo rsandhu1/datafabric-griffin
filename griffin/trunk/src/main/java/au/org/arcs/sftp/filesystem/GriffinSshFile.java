@@ -9,6 +9,8 @@ import java.util.Vector;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.sshd.server.SshFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.filesystem.FileObject;
@@ -24,6 +26,7 @@ import au.org.arcs.griffin.streams.RafOutputStream;
  */
 public class GriffinSshFile implements SshFile
 {
+	private final Logger		log	= LoggerFactory.getLogger(getClass());
 	private FileObject	fileObject;
 
 	/**
@@ -232,6 +235,9 @@ public class GriffinSshFile implements SshFile
 		if (!isWritable())
 			throw new IOException("No write permission : " + getName());
 		// create output stream
+		log.debug("createOutputStream:"+fileObject.getName()+";offset:"+offset);
+		if (offset==0)
+			return fileObject.getOutputStream();
 		return new RafOutputStream(fileObject.getRandomAccessFileObject("rw"), offset);
 	}
 
@@ -244,7 +250,9 @@ public class GriffinSshFile implements SshFile
 		if (!isReadable())
 			throw new IOException("No read permission : " + getName());
 		// move to the appropriate offset and create input stream
-		return new RafInputStream(fileObject, offset);
+		log.debug("createInputStream:"+fileObject.getName()+";offset:"+offset);
+//		return new RafInputStream(fileObject, offset);
+		return fileObject.getInpuStream(offset);
 	}
 
 	public void handleClose()

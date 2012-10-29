@@ -16,6 +16,8 @@
 package au.org.arcs.griffin.filesystem.impl.jargon;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.pub.io.IRODSFileInputStream;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.filesystem.FileObject;
@@ -394,5 +397,31 @@ public class JargonFileObject implements FileObject {
 	public String getOwner() {
 		// TODO Auto-generated method stub
 		return connection.getUser();
+	}
+
+	@Override
+	public OutputStream getOutputStream() throws IOException {
+		// TODO Auto-generated method stub
+		try {
+			return connection.getFileFactory().instanceIRODSFileOutputStream(remoteFile);
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	@Override
+	public InputStream getInpuStream(long offset) throws IOException {
+		// TODO Auto-generated method stub
+		try {
+			IRODSFileInputStream in = connection.getFileFactory().instanceIRODSFileInputStream(remoteFile);
+			in.skip(offset);
+			return in;
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
 	}
 }

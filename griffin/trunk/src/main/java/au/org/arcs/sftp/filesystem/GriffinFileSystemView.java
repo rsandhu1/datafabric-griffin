@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.apache.sshd.server.SshFile;
 import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.org.arcs.sftp.SftpServerSession;
 //import au.org.arcs.sftp.filesystem.SftpFileSystemView;
@@ -21,6 +23,7 @@ import au.org.arcs.griffin.filesystem.FileSystemConnection;
  */
 public class GriffinFileSystemView extends SftpFileSystemView
 {
+	private final Logger		log	= LoggerFactory.getLogger(getClass());
 	FileSystemConnection 	fileSystemConnection;
 	SftpServerSession		server_session;
 
@@ -76,7 +79,9 @@ public class GriffinFileSystemView extends SftpFileSystemView
 	public SshFile getFile(SshFile baseDir, String file)
 	{
 		// TODO What is needed here
-		return null;
+		log.debug("getFile:"+baseDir.getAbsolutePath()+"/"+file);
+		FileObject file_obj=getFileSystemConnection().getFileObject(baseDir.getAbsolutePath()+"/"+file);
+		return new GriffinSshFile(file_obj);
 		//return getFile(file);
 	}
 }

@@ -1,6 +1,8 @@
 package au.org.arcs.griffin.filesystem;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * File object interface
@@ -75,4 +77,8 @@ public interface FileObject {
     public boolean create();
     
     public String getOwner();
+    
+    public OutputStream getOutputStream() throws IOException;
+    
+    public InputStream getInpuStream(long offset) throws IOException;
 }
