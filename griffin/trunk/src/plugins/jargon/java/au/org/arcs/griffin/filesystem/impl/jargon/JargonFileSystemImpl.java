@@ -21,6 +21,7 @@ import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSProtocolManager;
 import org.irods.jargon.core.connection.IRODSSession;
 import org.irods.jargon.core.connection.IRODSSimpleProtocolManager;
+import org.irods.jargon.core.connection.SettableJargonProperties;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.UserAO;
@@ -55,7 +56,17 @@ public class JargonFileSystemImpl implements FileSystem {
 	private String zoneName;
 	private String adminCertFile;
 	private String adminKeyFile;
+	private String jargonInternalCacheBufferSize;
 	
+	public String getJargonInternalCacheBufferSize() {
+		return jargonInternalCacheBufferSize;
+	}
+
+	public void setJargonInternalCacheBufferSize(
+			String jargonInternalCacheBufferSize) {
+		this.jargonInternalCacheBufferSize = jargonInternalCacheBufferSize;
+	}
+
 	public String getAdminCertFile() {
 		return adminCertFile;
 	}
@@ -160,6 +171,15 @@ public class JargonFileSystemImpl implements FileSystem {
 			iRODSProtocolManager=IRODSSimpleProtocolManager.instance();
 			iRODSProtocolManager.initialize();
 			iRODSFileSystem=new IRODSSession(iRODSProtocolManager);
+			if (jargonInternalCacheBufferSize!=null) {
+				try {
+					SettableJargonProperties overrideJargonProperties = new SettableJargonProperties();
+					overrideJargonProperties.setInternalCacheBufferSize(Integer.parseInt(jargonInternalCacheBufferSize));
+					iRODSFileSystem.setJargonProperties(overrideJargonProperties);
+				}catch (Exception e2){
+					e2.printStackTrace();
+				}
+			}
 		} catch (JargonException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
