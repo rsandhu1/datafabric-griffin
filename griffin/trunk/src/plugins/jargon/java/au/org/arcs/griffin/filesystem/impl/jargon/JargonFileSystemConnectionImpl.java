@@ -160,8 +160,14 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+            try {
+				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+			} catch (JargonException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			throw new IOException(e.getMessage());
-		}
+		} 
 	}
 
     
