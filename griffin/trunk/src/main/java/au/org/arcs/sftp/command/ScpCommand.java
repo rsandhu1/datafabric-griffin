@@ -307,6 +307,7 @@ public class ScpCommand implements Command, Runnable, FileSystemAware {
         String perms = header.substring(1, 5);
         long length = Long.parseLong(header.substring(6, header.indexOf(' ', 6)));
         String name = header.substring(header.indexOf(' ', 6) + 1);
+        log.debug("perms "+perms+" length "+length+" name " + name+" buffersize "+getBufferSize(length));
 
         SshFile file;
         if (path.doesExist() && path.isDirectory()) {
@@ -327,10 +328,11 @@ public class ScpCommand implements Command, Runnable, FileSystemAware {
         try {
             ack();
 
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[getBufferSize(length)];
             while (length > 0) {
                 int len = (int) Math.min(length, buffer.length);
                 len = in.read(buffer, 0, len);
+                log.debug("read "+len +" bytes");
                 if (len <= 0) {
                     throw new IOException("End of stream reached");
                 }
