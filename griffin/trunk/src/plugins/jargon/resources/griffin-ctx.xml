@@ -196,6 +196,7 @@
 		<property name="serverPort" value="1247" />
 		<property name="zoneName" value="testZone" />
 		<property name="defaultAuthType" value="pam" />
+		<property name="jargonInternalCacheBufferSize" value="512000" />
 						<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
 		<!-- 
 		<property name="mapFile" value="irods-mapfile" />
