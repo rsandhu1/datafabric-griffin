@@ -18,17 +18,21 @@
  */
 package au.org.arcs.sftp;
 
-import java.io.UnsupportedEncodingException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
 import java.security.PublicKey;
+import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ResourceBundle;
 
 import org.apache.mina.util.Base64;
 import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import au.org.arcs.griffin.filesystem.FileSystemConnection;
+import au.org.arcs.sftp.utils.SftpLog;
+import au.org.arcs.sftp.utils.TypesWriter;
 
 /**
 * Implements <code>PublickeyAuthenticator</code> to skip Public Key Authentication check. Always fails!
@@ -62,9 +66,10 @@ public class SftpPublickeyAuthenticator implements PublickeyAuthenticator
 	// your authenticator will be called a second time with that key. If you
 	// still return true, the client will be authenticated.
 
-	public boolean authenticate(String username, PublicKey key, ServerSession session)
+	public boolean authenticate(String username, PublicKey key, ServerSession server_session)
 	{
 		log.debug("username:"+username+" is logging in with a key...");
+		log.debug("format: "+key.getFormat());
 //		log.debug("key: "+key.getClass()+" "+key.toString());
 		byte[] encoded=key.getEncoded();
 		log.debug("encoded: "+encoded.length);
@@ -72,14 +77,66 @@ public class SftpPublickeyAuthenticator implements PublickeyAuthenticator
 //			log.warn("public key is empty.");
 //			return false;
 //		}
-		byte[] keyString=Base64.encodeBase64(encoded);
-		log.debug("keyString: "+keyString);
-//		if (key instanceof RSAPublicKey) {
-//			byte[] keyString=Base64.decode(encoded);
-//			log.debug("keyString: "+new String(keyString));
-//		}
+		TypesWriter tw = new TypesWriter();
+		String sshKeyType = null;
+		if (key instanceof RSAPublicKey) {
+			 
+	 		tw.writeString("ssh-rsa");
+	 		tw.writeMPInt(((RSAPublicKey)key).getPublicExponent());
+	 		tw.writeMPInt(((RSAPublicKey)key).getModulus());
+	 		sshKeyType = "ssh-rsa";
+		} else if (key instanceof DSAPublicKey) {
+			 
+	 		tw.writeString("ssh-dss");
+	 		tw.writeMPInt(((DSAPublicKey)key).getParams().getP());
+	 		tw.writeMPInt(((DSAPublicKey)key).getParams().getQ());
+	 		tw.writeMPInt(((DSAPublicKey)key).getParams().getG());
+	 		tw.writeMPInt(((DSAPublicKey)key).getY());
+	 		sshKeyType = "ssh-dss";
+		}
+		byte[] sshkey=tw.getBytes();
+		log.debug("keyString: "+getBase64WithoutNewline(sshkey));
 		// File f = new File("/Users/" + username + "/.ssh/authorized_keys");
 		// return true;
-		return false; // We are only using UN/PW entry via Globus
+		SftpServerSession sftp_server_session = (SftpServerSession) server_session;
+		log.debug("ctx: "+sftp_server_session.getSftpSessionContext());
+		try
+		{
+
+			if (sftp_server_session == null)
+				throw new IOException(server_details.getAppTitle()+" session is invalid");
+			
+			String res_label=server_details.getOptions().getResources();
+			if (res_label == null)
+				throw new IOException(server_details.getAppTitle()+" resource label not set in config file");
+			ResourceBundle res_bundle=ResourceBundle.getBundle(res_label);
+			if (res_bundle == null)
+				throw new IOException(server_details.getAppTitle()+" resource bundle not loaded");
+			FileSystemConnection fileSystemConnection = null;
+			fileSystemConnection = server_details.getFileSystem().createFileSystemConnectionWithPublicKey(username, sshKeyType, getBase64WithoutNewline(sshkey));
+			if (fileSystemConnection == null)
+				return false;
+			SftpSessionContext ctx = server_details.createSftpContext(username, fileSystemConnection, res_bundle);
+			if (ctx == null)
+			{
+				fileSystemConnection.close();
+				return false;
+			}
+			sftp_server_session.setSftpSessionContext(ctx);
+		}
+		catch (Exception e)
+		{
+			SftpLog.logError(log,e);
+			return false;
+		}
+
+		return true; // We are only using UN/PW entry via Globus
 	}
+	
+	  private String getBase64WithoutNewline(byte[] b) {
+		    String b64Str = new String(Base64.encodeBase64(b));
+		    String result = b64Str.replaceAll("[\r\n]", "");
+		    result = result.replaceAll("[\n]", "");
+		    return result;
+		  }
 }

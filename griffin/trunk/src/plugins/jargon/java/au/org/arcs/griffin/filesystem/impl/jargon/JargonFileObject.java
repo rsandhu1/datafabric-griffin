@@ -369,7 +369,9 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public boolean setLastModified(long t) {
-        return remoteFile.setLastModified(t);
+    	return true;
+    	// currently not supported
+//        return remoteFile.setLastModified(t);
     }
 
     /**

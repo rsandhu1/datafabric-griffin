@@ -18,4 +18,6 @@ public interface FileSystem {
 	public FileSystemConnection createFileSystemConnection(GSSCredential credential) throws FtpConfigException, IOException;
 	public FileSystemConnection createFileSystemConnection(String username, String password) throws FtpConfigException, IOException;
 	public void exit();
+	public FileSystemConnection createFileSystemConnectionWithPublicKey(
+			String username, String sshKeyType, String base64KeyString) throws FtpConfigException, IOException;
 }

@@ -7,18 +7,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.globus.gsi.GlobusCredential;
+import org.globus.gsi.GlobusCredentialException;
+import org.globus.gsi.gssapi.GlobusGSSCredentialImpl;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSProtocolManager;
 import org.irods.jargon.core.connection.IRODSSession;
 import org.irods.jargon.core.connection.IRODSSimpleProtocolManager;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSFileSystem;
+import org.irods.jargon.core.pub.UserAO;
+import org.irods.jargon.core.pub.domain.User;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.RodsGenQueryEnum;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.exception.FtpConfigException;
@@ -45,7 +53,25 @@ public class JargonFileSystemImpl implements FileSystem {
 	private IRODSSession iRODSFileSystem;
 	private IRODSProtocolManager iRODSProtocolManager;
 	private String zoneName;
+	private String adminCertFile;
+	private String adminKeyFile;
 	
+	public String getAdminCertFile() {
+		return adminCertFile;
+	}
+
+	public void setAdminCertFile(String adminCertFile) {
+		this.adminCertFile = adminCertFile;
+	}
+
+	public String getAdminKeyFile() {
+		return adminKeyFile;
+	}
+
+	public void setAdminKeyFile(String adminKeyFile) {
+		this.adminKeyFile = adminKeyFile;
+	}
+
 	public String getZoneName() {
 		return zoneName;
 	}
@@ -258,6 +284,60 @@ public class JargonFileSystemImpl implements FileSystem {
 			// TODO Auto-generated catch block
 			throw new FtpConfigException(e.getMessage());
 		}
+	}
+
+	@Override
+	public FileSystemConnection createFileSystemConnectionWithPublicKey(
+			String username, String sshKeyType, String base64KeyString)
+			throws FtpConfigException, IOException {
+		// TODO Auto-generated method stub
+		if (adminCertFile==null||adminKeyFile==null) throw new FtpConfigException("admin key/cert file is not configured");
+		GlobusCredential adminCred;
+		try {
+			adminCred = new GlobusCredential(adminCertFile, adminKeyFile);
+	        GSSCredential gssCredential = new GlobusGSSCredentialImpl(adminCred, GSSCredential.INITIATE_AND_ACCEPT);
+        	IRODSAccount adminAccount=IRODSAccount.instance(serverName,serverPort,gssCredential);
+//	        	adminAccount.setZone(config.getInitParameter("zone-name", null));
+//		        adminAccount.setUserName(config.getInitParameter("adminUsername", "rods"));
+	        IRODSFileSystem irodsFileSystem = IRODSFileSystem.instance();
+	        UserAO userAO=irodsFileSystem.getIRODSAccessObjectFactory().getUserAO(adminAccount);
+//		        password=getRandomPassword(12);
+	        
+//		        createUser(irodsFileSystem,commonName,String.valueOf(password),sharedToken);
+	        
+	        StringBuilder sb = new StringBuilder();
+			sb.append(RodsGenQueryEnum.COL_USER_DN.getName());
+			sb.append(" LIKE '");
+			sb.append(sshKeyType);
+			sb.append(" ");
+			sb.append(base64KeyString);
+			sb.append(" %' and ");
+			sb.append(RodsGenQueryEnum.COL_USER_NAME.getName());
+			sb.append(" LIKE '");
+			sb.append(username);
+			sb.append("'");
+			List<User> users = userAO.findWhere(sb.toString());
+			if (users.size()>0) {
+				username=users.get(0).getName();
+		        String password=userAO.getTemporaryPasswordForASpecifiedUser(username);
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, "irods", username, password, zoneName, defaultResource);
+				return connection;
+			}
+		} catch (GlobusCredentialException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GSSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 }
