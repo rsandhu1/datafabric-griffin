@@ -129,6 +129,9 @@ public class GriffinSshFile implements SshFile
 	 */
 	public boolean isWritable()
 	{
+		if (!fileObject.exists()){
+			return (fileObject.getParent().getPermission()&FtpConstants.PRIV_WRITE)>0;
+		}
 		return (fileObject.getPermission()&FtpConstants.PRIV_WRITE)>0;
 	}
 
@@ -232,8 +235,8 @@ public class GriffinSshFile implements SshFile
 	public OutputStream createOutputStream(final long offset) throws IOException
 	{
 		// permission check
-		if (!isWritable())
-			throw new IOException("No write permission : " + getName());
+//		if (!isWritable())
+//			throw new IOException("No write permission : " + getName());
 		// create output stream
 		log.debug("createOutputStream:"+fileObject.getName()+";offset:"+offset);
 		if (offset==0)
