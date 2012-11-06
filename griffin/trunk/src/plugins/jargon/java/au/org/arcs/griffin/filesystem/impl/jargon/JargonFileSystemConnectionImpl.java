@@ -64,6 +64,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
                 + " credential:" + credential.toString());
         account = IRODSAccount.instance(serverName, serverPort,
                                                 credential);
+        account.setAuthenticationScheme(AuthScheme.GSI);
 //            if (defaultResource != null) {
 //                account.setDefaultStorageResource(defaultResource);
 //            }
@@ -107,6 +108,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 			                                        "/" + zoneName
 			                                        + "/home/" + username,
 			                                        defaultResource);
+	        account.setAuthenticationScheme(AuthScheme.GSI);
 		} catch (JargonException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
