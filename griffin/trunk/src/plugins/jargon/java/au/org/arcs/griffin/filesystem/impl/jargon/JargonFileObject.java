@@ -147,7 +147,7 @@ public class JargonFileObject implements FileObject {
     	FileObject[] fileObjects=new FileObject[files.length];
     	for (int i=0;i<files.length;i++){
     		try {
-				fileObjects[i]=new JargonFileObject(connection, connection.getFileFactory().instanceIRODSFile(files[i]));
+				fileObjects[i]=new JargonFileObject(connection, connection.getFileFactory().instanceIRODSFile(remoteFile.getParent()+"/"+files[i]));
 			} catch (JargonException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

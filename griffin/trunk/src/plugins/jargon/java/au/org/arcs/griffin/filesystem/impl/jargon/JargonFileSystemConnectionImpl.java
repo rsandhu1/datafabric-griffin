@@ -21,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.irods.jargon.core.connection.GSIIRODSAccount;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSCommands;
 import org.irods.jargon.core.connection.IRODSAccount.AuthScheme;
@@ -62,18 +64,21 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
     	this.jargonFileSystem=jargonFileSystem;
         log.debug("server:" + serverName + " serverPort:" + serverPort
                 + " credential:" + credential.toString());
-        account = IRODSAccount.instance(serverName, serverPort,
-                                                credential);
-        account.setAuthenticationScheme(AuthScheme.GSI);
 //            if (defaultResource != null) {
 //                account.setDefaultStorageResource(defaultResource);
 //            }
         try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
+            account = GSIIRODSAccount.instance(serverName, serverPort, credential.getName().toString(),
+                    credential);
 			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		} catch (GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new IOException(e.getMessage());
@@ -103,25 +108,29 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
                 + " user: " + username + "@" + zoneName + " credential:"
                 + credential.toString());
         try {
-			account = IRODSAccount.instance(serverName, serverPort,
-													credential, 
-			                                        "/" + zoneName
-			                                        + "/home/" + username,
-			                                        defaultResource);
-	        account.setAuthenticationScheme(AuthScheme.GSI);
-		} catch (JargonException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			throw new IOException(e1.getMessage());
-		}
-        if (defaultResource != null) {
-            account.setDefaultStorageResource(defaultResource);
-        }
-        try {
+            account = GSIIRODSAccount.instance(serverName, serverPort, credential.getName().toString(),
+                    credential);
+            account.setZone(zoneName);
+            account.setUserName(username);
+//            account.setDefaultStorageResource(defaultResource);
+            account.setHomeDirectory("/" + zoneName + "/home/" + username);
+//			account = GSIIRODSAccount.instance(serverName, serverPort,
+//													credential, 
+//			                                        "/" + zoneName
+//			                                        + "/home/" + username,
+//			                                        defaultResource);
+//	        account.setAuthenticationScheme(AuthScheme.GSI);
+	        if (defaultResource != null) {
+	            account.setDefaultStorageResource(defaultResource);
+	        }
 			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		} catch (GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new IOException(e.getMessage());
