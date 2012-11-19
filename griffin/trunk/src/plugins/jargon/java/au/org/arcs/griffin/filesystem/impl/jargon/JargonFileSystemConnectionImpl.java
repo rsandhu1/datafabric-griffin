@@ -69,16 +69,11 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 //            }
         try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
-            account = GSIIRODSAccount.instance(serverName, serverPort, credential.getName().toString(),
-                    credential);
+            account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
 			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IOException(e.getMessage());
-		} catch (GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new IOException(e.getMessage());
@@ -108,8 +103,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
                 + " user: " + username + "@" + zoneName + " credential:"
                 + credential.toString());
         try {
-            account = GSIIRODSAccount.instance(serverName, serverPort, credential.getName().toString(),
-                    credential);
+            account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
             account.setZone(zoneName);
             account.setUserName(username);
 //            account.setDefaultStorageResource(defaultResource);
@@ -120,17 +114,10 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 //			                                        + "/home/" + username,
 //			                                        defaultResource);
 //	        account.setAuthenticationScheme(AuthScheme.GSI);
-	        if (defaultResource != null) {
-	            account.setDefaultStorageResource(defaultResource);
-	        }
 			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IOException(e.getMessage());
-		} catch (GSSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new IOException(e.getMessage());
@@ -158,12 +145,9 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 									username, password,
 			                      "/" + zoneName
 			                      + "/home/" + username,
-			                      zoneName, "");
+			                      zoneName, defaultResource==null?"":defaultResource);
     	if (authType.equalsIgnoreCase("pam")) 
     		account.setAuthenticationScheme(AuthScheme.PAM);
-		if (defaultResource != null) {
-			account.setDefaultStorageResource(defaultResource);
-		}
         try {
 			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
