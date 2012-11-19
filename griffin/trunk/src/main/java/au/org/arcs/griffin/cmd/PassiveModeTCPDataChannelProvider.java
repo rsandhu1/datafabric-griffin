@@ -342,4 +342,10 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 		return this.isUsed;
 	}
 
+	@Override
+	public void transferData() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

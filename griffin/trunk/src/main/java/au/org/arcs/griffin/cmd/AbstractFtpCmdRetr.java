@@ -145,16 +145,17 @@ public abstract class AbstractFtpCmdRetr extends AbstractFtpCmd implements FtpCo
                     }
                 }
                 getCtx().getTransferMonitor().sendPerfMarker();
-                Thread thread = new Thread(provider);
-                thread.start();
-                try {
-                    if (thread.isAlive()) {
-                        thread.join();
-                    }
-                } catch (InterruptedException e) {
-                    log.warn("interrupted exception, this is logged and ignored");
-                    log.warn(e.toString());
-                }
+//                Thread thread = new Thread(provider);
+//                thread.start();
+                provider.transferData();
+//                try {
+//                    if (thread.isAlive()) {
+//                        thread.join();
+//                    }
+//                } catch (InterruptedException e) {
+//                    log.warn("interrupted exception, this is logged and ignored");
+//                    log.warn(e.toString());
+//                }
 //                provider.closeProvider();
                 log.info("transfer is complete");
             } else { // Stream mode
@@ -184,6 +185,7 @@ public abstract class AbstractFtpCmdRetr extends AbstractFtpCmd implements FtpCo
             msgOut(MSG550);
             log.error(e.toString());
         } catch (RuntimeException e) {
+        	e.printStackTrace();
             log.error(e.toString());
             msgOut(MSG550);
             log.error(e.toString());
