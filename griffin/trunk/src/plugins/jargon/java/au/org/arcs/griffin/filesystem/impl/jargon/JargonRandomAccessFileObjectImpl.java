@@ -97,7 +97,7 @@ public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * {@inheritDoc}
      */
     public void seek(long offset) throws IOException {
-        raf.seek(offset, FileIOOperations.SeekWhenceType.SEEK_CURRENT);
+        raf.seek(offset, FileIOOperations.SeekWhenceType.SEEK_START);
     }
 
     /**
