@@ -79,6 +79,7 @@ public class SynchronizedInputStream {
 	synchronized public int read(EDataBlock eDataBlock) throws IOException {
 		try {
 			EDataBlock nextBlock=dataQueue.take();
+			eDataBlock.clearHeader();
 			eDataBlock.setOffset(nextBlock.getOffset());
 			eDataBlock.setSize(nextBlock.getSize());
 			eDataBlock.setData(nextBlock.getData());
@@ -98,6 +99,7 @@ public class SynchronizedInputStream {
 		for (int i=0;i<threadNum;i++) {
 			EDataBlock eDataBlock=new EDataBlock("main-thread", bufferSize);
 			eDataBlock.clearHeader();
+			eDataBlock.setOffset(0);
 			eDataBlock.setSize(-1);
 			try {
 				dataQueue.put(eDataBlock);
