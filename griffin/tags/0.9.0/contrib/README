@@ -1,0 +1,31 @@
+Some configuration files that make working easier.
+
+== Eclipse ==
+ * griffin-code-formatters.xml:
+   Open the project properties, select "Java Code Style -> Formatter",
+   and enable "project specific settings."  Then you import this file,
+   and select the (newly imported) "Griffin Conventions".
+ 
+ * griffin-code-templates.xml:
+   Open the project properties, select "Java Code Style -> Code Templates",
+   and enable "project specific settings."  Then you import this file.
+   You may want to customise the occurrences of "Your Name", "Your Institution",
+   ... along with URLs and e-mail addresses.
+   
+ * griffin-code-checks.xml:
+   (Requires "Eclipse Checkstyle plugin".)
+   Open the project properties, select "Checkstyle" and enable "Checkstyle
+   active for this project".  Select the second tab ("Local Check
+   Configuration") and add a new configuration.  In the dialogue, select the
+   "Project Relative Configuration" type, choose this file, and call the new 
+   configuration e. g. "Griffin Checks".  Back on the "Main" tab, select the 
+   new "Griffin Checks" to activate the checks for the plugin.
+
+ * acceptance_testing (directory):
+   This directory contains some Python scripts to test standard operations
+   against a GridFTP server.  The script uses Python the doctest, with the
+   tests specified in text files within the "tests" sub-directory.  Execution
+   of the "acceptance_testing.py" script from within the acceptance_testing
+   directory should execute the whole test suite.  Certain configuration
+   for the tests can be tweaked simply by editing "test_config.py" (e. g.
+   name of host to test).

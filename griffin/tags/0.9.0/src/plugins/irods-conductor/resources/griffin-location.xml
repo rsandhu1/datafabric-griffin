@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<location-selector>
+	<locations>
+		<location id="vpac" hostname="arcs-df.vpac.org" port="2810">
+			<resource name="arcs-df.vpac.org"/>
+		</location>
+		<location id="ivec" hostname="arcs-df.ivec.org" port="2810">
+			<resource name="arcs-df.ivec.org"/>
+		</location>
+		<location id="ersa" hostname="arcs-df.eresearchsa.edu.au" port="2810">
+			<resource name="arcs-df.eresearchsa.edu.au"/>
+		</location>
+		<location id="tpac" hostname="arcs-df.sf.utas.edu.au" port="2810">
+			<resource name="arcs-df.tpac.org.au"/>
+		</location>
+		<location id="uq" hostname="arcs-df.hpcu.uq.edu.au" port="2810">
+			<resource name="arcs-df.qcif.org"/>
+		</location>
+		<location id="intersec" hostname="arcs-df.ac3.edu.au" port="2810">
+			<resource name="arcs-df.ac3.edu.au"/>
+		</location>
+	</locations>
+	<selector>
+		<!-- ACT -->
+		<if country="AU" region="01">
+			<select priority="1">intersec</select>
+			<select priority="2">vpac</select>
+		</if>
+		<!-- NSW -->
+		<if country="AU" region="02">
+			<select priority="1">intersec</select>
+			<select priority="2">vpac</select>
+		</if>
+		<!-- NT -->
+		<if country="AU" region="03">
+			<select priority="1">ersa</select>
+			<select priority="2">vpac</select>
+		</if>
+		<!-- QLD -->
+		<if country="AU" region="04">
+			<select priority="1">uq</select>
+			<select priority="2">intersec</select>
+			<select priority="3">vpac</select>
+		</if>
+		<!-- SA -->
+		<if country="AU" region="05">
+			<select priority="1">ersa</select>
+			<select priority="2">vpac</select>
+		</if>
+		<!-- TAS -->
+		<if country="AU" region="06">
+			<select priority="1">tpac</select>
+			<select priority="2">vpac</select>
+			<select priority="3">intersec</select>
+		</if>
+		<!-- VIC -->
+		<if country="AU" region="07">
+			<select priority="1">vpac</select>
+			<select priority="2">intersec</select>
+		</if>
+		<!-- WA -->
+		<if country="AU" region="08">
+			<select priority="1">ivec</select>
+			<select priority="2">ersa</select>
+			<select priority="3">vpac</select>
+		</if>
+		<!-- other areas, e.g. other countries -->
+		<else>vpac</else>
+	</selector>
+</location-selector>

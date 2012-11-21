@@ -1,0 +1,95 @@
+==========================
+Testing for MongoDB/GridFS
+==========================
+
+The tests in this file exercise the GridFTP server using the globus-url-copy
+and UberFTP clients.
+
+Make sure that the configuration in test_config.py is set appropriately!
+
+The following line is some bootstrapping. It must be kept here.
+
+    >>> from acceptance_testing import execute
+    >>> import os
+    >>> import tempfile
+
+
+Testing commands and simple operations
+======================================
+
+uberftp ls /test
+----------------
+
+Checks the listing of the sub directory "/test"
+
+    >>> result = execute('uberftp -passive %(host)s "ls /test"')
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    220 ... GridFTP Server (Griffin, Java, ...) Ready.
+    230 User /C=.../CN=... logged in.
+    total ...
+    >>> 'test_config.py' in result
+    True
+
+
+globus-url-copy get /test/test_config.py
+----------------------------------------
+
+Copies the file /test/test_config.py to the local host. The local file is
+verified and removed again.
+
+    >>> dummy, filename = tempfile.mkstemp()
+    >>> command = 'globus-url-copy gsiftp://%(host)s/test/test_config.py file://' + filename
+    >>> dummy = execute(command)
+    >>> print open(filename).read()
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    # -*- coding: utf-8 -*-
+    """
+    Configuration of some parameters for the tests.
+    """
+    <BLANKLINE>
+    ## Created: 2010-12-15 Guy K. Kloss <Guy.Kloss@aut.ac.nz>
+    ##
+    ## Copyright 2010 Australian Research Collaboration Service
+    ##                and Auckland University of Technology, New Zealand
+    ##
+    ## Some rights reserved.
+    ##
+    ## http://www.arcs.org.au/
+    ## http://www.aut.ac.nz/
+    <BLANKLINE>
+    TESTS_DIR = 'tests'
+    REPLACEMENTS = {'host': '...'}
+    <BLANKLINE>
+
+
+globus-url-copy put /test/bar.py
+--------------------------------
+
+Copies the (previously retrieved) file back to the remote host as "/test/bar.py",
+and checks afterwards if it's there.
+
+    >>> command = 'globus-url-copy file://' + filename + ' gsiftp://%(host)s/test/bar.py'
+    >>> dummy = execute(command)
+    >>> result = execute('uberftp -passive %(host)s "ls /test"')
+    >>> 'bar.py' in result
+    True
+    >>> os.remove(filename)
+
+
+uberftp rm /test/bar.py
+-----------------------
+
+Removes the remote file "/test/bar.py" again and checks the directory content.
+
+    >>> print execute('uberftp -passive %(host)s "rm /test/bar.py"')
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    220 ... GridFTP Server (Griffin, Java, ...) Ready.
+    230 User /C=.../CN=... logged in.
+    <BLANKLINE>
+    >>> result = execute('uberftp -passive ngdata.massey.ac.nz "ls /test"')
+    >>> 'bar.py' not in result
+    True
