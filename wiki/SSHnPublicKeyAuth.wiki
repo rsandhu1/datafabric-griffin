@@ -80,3 +80,9 @@ JAVA_OPTIONS="-DGRIFFIN_HOME=$APP_HOME -Djava.library.path=$APP_HOME -Dlog4j.con
 }}}
 
 *userid* is needed if you want to use SSH public key authentication. And the account that runs irods should have .irodsEnv and .irodsA set up with irods admin permission (can generate temp password for other users)
+
+
+You need to generate a ssh server key:
+{{{
+java -classpath griffin.jar au.org.arcs.sftp.utils.KeyGen
+}}}
