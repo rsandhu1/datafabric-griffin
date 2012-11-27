@@ -1,6 +1,0 @@
-1. extract tar ball to somewhere, e.g. /opt
-2. (optional) create a soft link to griffin, e.g. /opt/griffin
-3. make sure the account you use to run griffin owns /opt/griffin
-4. make sure you have access to your server's key/cert files, e.g. in /etc/grid-security
-5. run install.sh
-6. start griffin and have fun.

@@ -1,4 +1,0 @@
-APP_HOME=GRIFFIN_HOME_PLACE_HOLDER
-JAVA_OPTIONS="-DGRIFFIN_HOME=$APP_HOME -Djava.library.path=$APP_HOME -Dlog4j.configuration=file:$APP_HOME/log4j.properties -server -Xms128m -Xmx384m"
-APP_USER=rods
-
