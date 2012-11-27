@@ -55,8 +55,6 @@ In griffin-ctx.xml, need to add ssh configs:
                 <property name="zoneName" value="testZone" />
                 <property name="defaultAuthType" value="irods" />
                 <property name="jargonInternalCacheBufferSize" value="512000" />
-                <property name="adminCertFile" value="/etc/grid-security/irodscert.pem" />
-                <property name="adminKeyFile" value="/etc/grid-security/irodskey.pem" />
 
                 <!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
                 <!-- 
@@ -79,10 +77,18 @@ Then in /etc/default/griffin you need to add something to JAVA_OPTIONS:
 JAVA_OPTIONS="-DGRIFFIN_HOME=$APP_HOME -Djava.library.path=$APP_HOME -Dlog4j.configuration=file:$APP_HOME/log4j.properties -server -Xms512m -Xmx768m -Djavax.net.ssl.trustStore=/opt/davis/etc/ssl.keystore -Djavax.net.ssl.trustStorePassword=123456 -DX509_CERT_DIR=/etc/grid-security/certificates -Duserid=$(id $APP_USER -u)"
 }}}
 
-*userid* is needed if you want to use SSH public key authentication. And the account that runs irods should have .irodsEnv and .irodsA set up with irods admin permission (can generate temp password for other users)
-
+*userid* is needed if you want to use SSH public key authentication. And the account that runs irods should have .irodsEnv and .irodsA set up with irods admin permission (can generate temp password for other users) so better run griffin using the same user as running irods
 
 You need to generate a ssh server key:
 {{{
 java -classpath griffin.jar au.org.arcs.sftp.utils.KeyGen
+}}}
+
+Then add the ssh public key to the irods user:
+{{{
+iadmin aua username "ssh-public-key"
+}}}
+The *ssh-public-key* is like
+{{{
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA0uo/hYfSEfnKabqB2r2Zxb451PtQ8XkPKxKf2YSRDTW2pnw2ZzeJc2YbASqjw5XPGQRhjnmnAwfmrzTjT5+GpLn7ygHTZVJzYj26QTU/uXxuZo/xUG9WNUxtPxTp1ogaKYDA8UGUjjMsSh/H2VHAz0vX8gjh6XhxfRX0nXzrwir+MJy1cnDv59Lg5cZwdVl1r5NOekB70TMUj3HaKg3+FppRSqWLLGDY7A+9/uEfdFubv9sWEMGXnqWfddufnIxQVWgNg1bel/6cFWp9eqgK8Fcuu8swwRsFUaKyYJVvMHDt12Yj1f1uc41lpNLs0fOjImwZOIS6gl/xInEq88LS+Q== shunde@shunde-client.ivec.org
 }}}
