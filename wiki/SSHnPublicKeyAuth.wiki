@@ -88,7 +88,7 @@ Then add the ssh public key to the irods user:
 {{{
 iadmin aua username "ssh-public-key"
 }}}
-The *ssh-public-key* is like
+The *ssh-public-key* is in openssh format (just get it from .ssh)
 {{{
 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA0uo/hYfSEfnKabqB2r2Zxb451PtQ8XkPKxKf2YSRDTW2pnw2ZzeJc2YbASqjw5XPGQRhjnmnAwfmrzTjT5+GpLn7ygHTZVJzYj26QTU/uXxuZo/xUG9WNUxtPxTp1ogaKYDA8UGUjjMsSh/H2VHAz0vX8gjh6XhxfRX0nXzrwir+MJy1cnDv59Lg5cZwdVl1r5NOekB70TMUj3HaKg3+FppRSqWLLGDY7A+9/uEfdFubv9sWEMGXnqWfddufnIxQVWgNg1bel/6cFWp9eqgK8Fcuu8swwRsFUaKyYJVvMHDt12Yj1f1uc41lpNLs0fOjImwZOIS6gl/xInEq88LS+Q== shunde@shunde-client.ivec.org
 }}}
