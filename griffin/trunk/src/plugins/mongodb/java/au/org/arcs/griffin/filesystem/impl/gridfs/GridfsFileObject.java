@@ -18,6 +18,8 @@
 package au.org.arcs.griffin.filesystem.impl.gridfs;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -322,5 +324,49 @@ public class GridfsFileObject implements FileObject {
      */
     public GridfsFileSystemConnectionImpl getConnection() {
         return _connection;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#create()
+     */
+    @Override
+    public boolean create() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getOwner()
+     */
+    @Override
+    public String getOwner() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getOutputStream()
+     */
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getInpuStream(long)
+     */
+    @Override
+    public InputStream getInpuStream(long offset) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
