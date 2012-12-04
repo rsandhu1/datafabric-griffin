@@ -42,8 +42,8 @@ public interface FileSystem {
      * Actively connects to file system.
      * 
      * @param username User name.
-     * @param sshKeyType Type of SSH key used.
-     * @param base64KeyString Base64 encoded SSH key.
+     * @param sshKeyType Type of SSH key used, e.g. dsa, rsa.
+     * @param base64KeyString Base64 encoded SSH public key.
      * @return File system connection handle.
      * @throws FtpConfigException In case of problems with the configuration
      *     used to access the file system.
