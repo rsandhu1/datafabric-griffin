@@ -17,6 +17,8 @@ package au.org.arcs.griffin.filesystem.impl.localfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -259,5 +261,49 @@ public class LocalFileObject implements FileObject {
      */
     public boolean setLastModified(long t) {
         return localFile.setLastModified(t);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#create()
+     */
+    @Override
+    public boolean create() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getOwner()
+     */
+    @Override
+    public String getOwner() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getOutputStream()
+     */
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getInpuStream(long)
+     */
+    @Override
+    public InputStream getInpuStream(long offset) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
