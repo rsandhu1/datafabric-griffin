@@ -103,6 +103,32 @@ public class LocalFileSystemImpl implements FileSystem {
     /**
      * {@inheritDoc}
      *
+     * @see au.org.arcs.griffin.filesystem.FileSystem#createFileSystemConnection(java.lang.String, java.lang.String)
+     */
+    @Override
+    public FileSystemConnection createFileSystemConnection(
+            String username, String password)
+            throws FtpConfigException, IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileSystem#createFileSystemConnectionWithPublicKey(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public FileSystemConnection createFileSystemConnectionWithPublicKey(
+            String username, String sshKeyType, String base64KeyString)
+            throws FtpConfigException, IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see au.org.arcs.griffin.filesystem.FileSystem#exit()
      */
     public void exit() {

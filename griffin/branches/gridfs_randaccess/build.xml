@@ -56,7 +56,7 @@
 	
 
     <target name="compile" depends="prepare">
-        <javac destdir="${classes}/main" srcdir="${src}" debug="${debug}" includeAntRuntime="false" source="1.5" target="1.5">
+        <javac destdir="${classes}/main" srcdir="${src}" debug="${debug}" includeAntRuntime="false" source="1.6" target="1.6">
             <classpath>
                 <fileset refid="lib.files"/>
           </classpath>
@@ -86,7 +86,7 @@
         <fileset id="plugin.lib.files" dir="lib/${plugin-name}">
             <include name="*.jar"/>
         </fileset>
-        <javac destdir="${classes}/${plugin-name}" srcdir="src/plugins/${plugin-name}/java" debug="${debug}" includeAntRuntime="false" source="1.5" target="1.5">
+        <javac destdir="${classes}/${plugin-name}" srcdir="src/plugins/${plugin-name}/java" debug="${debug}" includeAntRuntime="false" source="1.6" target="1.6">
             <classpath>
                 <fileset refid="plugin.lib.files"/>
             	<fileset refid="dist.files"/>
