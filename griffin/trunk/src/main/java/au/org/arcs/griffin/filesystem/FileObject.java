@@ -7,6 +7,7 @@ import java.io.OutputStream;
 /**
  * File object interface
  * (for file system entries such as files and directories).
+ * Most of them are influenced by Java.io.File (http://docs.oracle.com/javase/6/docs/api/java/io/File.html)
  * 
  * @author Shunde Zhang
  * 
@@ -20,7 +21,7 @@ public interface FileObject {
     public String getName();
 
     /**
-     * ??? check against getCanonicalPath()
+     * Converts this abstract pathname into a pathname string.
      *
      * @return Full path name of file system entry.
      */
@@ -55,7 +56,7 @@ public interface FileObject {
     public int getPermission();
 
     /**
-     * ??? check against getPath()
+     * Returns the canonical pathname string of this abstract pathname.
      *
      * @return Full path name of file system entry.
      */
@@ -89,9 +90,9 @@ public interface FileObject {
             throws IOException;
 
     /**
-     * ??? Delete file system entry?
+     * Delete file or directory
      * 
-     * @return ??? True on success.
+     * @return True on success.
      */
     public boolean delete();
 
@@ -101,32 +102,32 @@ public interface FileObject {
     public FileObject getParent();
 
     /**
-     * ??? Make a new directory. (Wouldn't this require a parameter?)
+     * Make a new directory. 
      * 
-     * @return ??? True on success.
+     * @return True on success.
      */
     public boolean mkdir();
 
     /**
-     * ??? Rename current entry to a different name.
+     * Rename current entry to a different name.
      * 
-     * @param aFile ??? New entry with altered file name/path.
-     * @return ??? True on success.
+     * @param aFile New entry with altered file name/path.
+     * @return True on success.
      */
     public boolean renameTo(FileObject aFile);
 
     /**
      * Sets the last modified time stamp to a new value.
      * 
-     * @param t New time stamp value
-     * @return ??? True on success.
+     * @param time New time stamp value
+     * @return True on success.
      */
-    public boolean setLastModified(long t);
+    public boolean setLastModified(long time);
     
     /**
-     * ??? Make a new file system entry. (Wouldn't this require a parameter?)
+     * Make a new file entry.
      * 
-     * @return ??? True on success.
+     * @return True on success.
      */
     public boolean create();
     
@@ -136,18 +137,18 @@ public interface FileObject {
     public String getOwner();
     
     /**
-     * ??? Gives reading access to the file system entry (file) content as a stream.
+     * Gets an OutputStream to the file entry (file) 
      * 
-     * @return Reading access to content as a stream.
+     * @return OutputStream to the content 
      * @throws IOException If file access fails or privileges are insufficient.
      */
     public OutputStream getOutputStream() throws IOException;
     
     /**
-     * ??? Gives writing access to the file system entry (file) content as a stream.
+     * Gets an InputStream to the file entry (file) 
      * 
-     * @return Writing access to content as a stream.
-     * @param offset ??? Offset in bytes from where the write should start.
+     * @return InputStream to the content 
+     * @param offset Offset in bytes from where the read should start.
      * @throws IOException If file access fails or privileges are insufficient.
      */
     public InputStream getInpuStream(long offset) throws IOException;

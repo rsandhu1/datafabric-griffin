@@ -67,7 +67,7 @@ public interface FileSystem {
 	        throws FtpConfigException, IOException;
 	
 	/**
-	 * ??? Disconnect file system.
+	 * Exit file system, clear states etc., called when Griffin is stopped.
 	 */
 	public void exit();
 }
