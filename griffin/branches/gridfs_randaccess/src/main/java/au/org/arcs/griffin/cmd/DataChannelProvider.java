@@ -72,6 +72,6 @@ public interface DataChannelProvider extends Runnable{
 	boolean isUsed();
 	
 	void prepare() throws IOException;
-
+	void transferData() throws IOException;
 
 }

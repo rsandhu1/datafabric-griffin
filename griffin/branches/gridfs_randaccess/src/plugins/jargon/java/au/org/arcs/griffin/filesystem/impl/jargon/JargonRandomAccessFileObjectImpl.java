@@ -18,11 +18,12 @@ package au.org.arcs.griffin.filesystem.impl.jargon;
 
 import java.io.IOException;
 
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.io.FileIOOperations;
+import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.pub.io.IRODSRandomAccessFile;
+
 import au.org.arcs.griffin.filesystem.RandomAccessFileObject;
-import edu.sdsc.grid.io.RemoteFile;
-import edu.sdsc.grid.io.RemoteRandomAccessFile;
-import edu.sdsc.grid.io.irods.IRODSFile;
-import edu.sdsc.grid.io.irods.IRODSRandomAccessFile;
 
 /**
  * an implementation for jargon
@@ -32,7 +33,7 @@ import edu.sdsc.grid.io.irods.IRODSRandomAccessFile;
  */
 public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject {
 
-    private RemoteRandomAccessFile raf;
+    private IRODSRandomAccessFile raf;
 
     /**
      * Constructor.
@@ -42,10 +43,16 @@ public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject 
      *          "r" and "rw" should be suppported. 
      * @throws IOException If file access fails or privileges are insufficient.
      */
-    public JargonRandomAccessFileObjectImpl(RemoteFile file, String mode)
+    public JargonRandomAccessFileObjectImpl(JargonFileSystemConnectionImpl connection, IRODSFile file, String mode)
             throws IOException {
         if (file instanceof IRODSFile) {
-            raf = new IRODSRandomAccessFile((IRODSFile) file, mode);
+            try {
+				raf = connection.getFileFactory().instanceIRODSRandomAccessFile(file);
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
         } else {
             throw new IOException("Object type is not recognizable.");
         }
@@ -90,7 +97,7 @@ public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * {@inheritDoc}
      */
     public void seek(long offset) throws IOException {
-        raf.seek(offset);
+        raf.seek(offset, FileIOOperations.SeekWhenceType.SEEK_START);
     }
 
     /**

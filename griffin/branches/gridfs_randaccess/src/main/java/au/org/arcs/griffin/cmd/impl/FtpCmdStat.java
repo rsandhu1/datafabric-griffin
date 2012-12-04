@@ -61,7 +61,7 @@ public class FtpCmdStat extends AbstractFtpCmd {
      * {@inheritDoc}
      */
     public void execute() throws FtpCmdException {
-        String clientHost = getCtx().getClientSocket().getInetAddress().getHostAddress();
+        String clientHost = getCtx().getClientInetAddress().getHostAddress();
         String msg = getCtx().getUser() + "(" + clientHost + ")";
         msgOut(MSG211_STAT, new Object[] {msg});
         Map<String, Long> map = new HashMap(); //getCtx().getUserManager().getUserStatistics(getCtx().getUser());

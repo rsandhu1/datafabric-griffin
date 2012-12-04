@@ -90,7 +90,7 @@ public class TCPDataChannel implements DataChannel {
 	public DataChannelInfo init() throws IOException {
 		if (dataChannelInfo==null){ //passive
 	        /* Get local machine address and check protocol version. */
-	        InetAddress localIp = ctx.getClientSocket().getLocalAddress();
+	        InetAddress localIp = ctx.getLocalInetAddress();
 //	        int currentProtocol = getProtocolIdxByAddr(localIp);
 //	        boolean ok = (preferredProtocol == currentProtocol) || (preferredProtocol == 0);
 //	        if (!ok) {
@@ -188,7 +188,7 @@ public class TCPDataChannel implements DataChannel {
 	                	log.debug("thread "+ threadNum +" got eod.");
 	                	provider.seenEOD();
 	                    eod = true;
-	                    break;
+	                    
 	                    //Turn off the eod flag
 //	                    say("EOD received");
 //	                    eDataBlock.unsetDescriptor(EDataBlock.DESC_CODE_EOD);
@@ -203,14 +203,15 @@ public class TCPDataChannel implements DataChannel {
 //	                os.write(eDataBlock.getData(), 0, (int)count);
 //	                os.flush();
 	                sos.write(eDataBlock);
-	                ctx.updateIncrementalStat(FtpConstants.STAT_BYTES_UPLOADED, count);
+	                if (eod) break;
+//	                ctx.updateIncrementalStat(FtpConstants.STAT_BYTES_UPLOADED, count);
 //	                incCompleted(count);
 //	                if (isAbortRequested()) {
 //	                    log.debug("File transfer aborted");
 //	                    msgOut(MSG426);
 //	                    return;
 //	                }
-	                ctx.getTransferMonitor().execute(eDataBlock.getOffset(), eDataBlock.getSize());
+//	                ctx.getTransferMonitor().execute(eDataBlock.getOffset(), eDataBlock.getSize());
 
 //	                synchronized (_parent) {
 //	                    ostr.write(eDataBlock.getHeader());

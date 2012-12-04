@@ -68,7 +68,7 @@
     </users>
     
     <mappings>
-        <mapping dn="/C=NZ/O=BeSTGRID/OU=Massey University/CN=Guy Kloss"
+        <mapping dn="/DC=nz/DC=org/DC=bestgrid/DC=slcs/O=Auckland University of Technology/GeneratCN=Guy Kloss EMd8rEdx74Pu7Ok9iBhxPbNEig4"
                 uid="fooman" />
         <mapping dn="/C=AU/O=APACGrid/OU=SAPAC/CN=Shunde Zhang"
                 uid="admin" />

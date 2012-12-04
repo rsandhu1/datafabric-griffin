@@ -81,9 +81,9 @@ public class FtpCmdAdat extends AbstractFtpCmd {
 //        log.debug(byteArrayToHexString(token));
         ChannelBinding cb;
         try {
-            cb = new ChannelBinding(getCtx().getClientSocket().getInetAddress(),InetAddress.getLocalHost(), null);
+            cb = new ChannelBinding(getCtx().getClientInetAddress(),InetAddress.getLocalHost(), null);
             log.debug("adat: Local address: " + InetAddress.getLocalHost());
-            log.debug("adat: Client address: " + getCtx().getClientSocket().getInetAddress());
+            log.debug("adat: Client address: " + getCtx().getClientInetAddress());
         } catch (UnknownHostException e) {
             msgOut(MSG500_ADAT, new String[]{e.getMessage()});
             return;

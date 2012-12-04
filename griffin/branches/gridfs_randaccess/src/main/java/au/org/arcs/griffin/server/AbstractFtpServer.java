@@ -80,6 +80,8 @@ public abstract class AbstractFtpServer extends AbstractAppAwareBean implements 
     private Date                   connectionCountHWMarkDate = new Date();
     
     private FileSystem			   fileSystem;
+    
+    private String				   sshEnabled;
 
     public FileSystem getFileSystem() {
 		return fileSystem;
@@ -396,5 +398,13 @@ public abstract class AbstractFtpServer extends AbstractAppAwareBean implements 
     public void setName(String name) {
         this.name = name;
     }
+
+	public String getSshEnabled() {
+		return sshEnabled;
+	}
+
+	public void setSshEnabled(String sshEnabled) {
+		this.sshEnabled = sshEnabled;
+	}
 
 }

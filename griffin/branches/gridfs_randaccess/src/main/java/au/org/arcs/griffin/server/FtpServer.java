@@ -108,5 +108,9 @@ public interface FtpServer extends Runnable {
     void addFtpEventListener(FtpEventListener lstnr);
     
     FileSystem getFileSystem();
+    
+    String getSshEnabled();
+    
+    String getResources();
 
 }

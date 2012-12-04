@@ -58,6 +58,11 @@ public class FtpCmdUserGSI extends AbstractFtpCmd {
             msgOut(MSG501);
             return;
         }
+        if (getCtx().getControlChannelMode()==1){
+        	getCtx().setUser(getArguments());
+            msgOut(MSG230_GSI_USER, getArguments());
+            return;
+        }
         if (getCtx().getServiceContext() == null
                 || !getCtx().getServiceContext().isEstablished()) {
             msgOut(MSG503_ENC);
@@ -82,7 +87,7 @@ public class FtpCmdUserGSI extends AbstractFtpCmd {
                 msgOut(MSG530_AUTH_GSI_USER, new String[] {e.getMessage()});
                 return;
             }
-            String clientHost = getCtx().getClientSocket().getInetAddress()
+            String clientHost = getCtx().getClientInetAddress()
                                         .getHostAddress();
             getCtx().getEventListener()
                     .loginPerformed(clientHost, getCtx().isAuthenticated());

@@ -29,11 +29,18 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sshd.SshServer;
+import org.apache.sshd.common.KeyPairProvider;
+import org.apache.sshd.common.NamedFactory;
+import org.apache.sshd.server.Command;
+import org.apache.sshd.server.ServerFactoryManager;
+import org.apache.sshd.server.sftp.SftpSubsystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -42,10 +49,21 @@ import au.org.arcs.griffin.common.BeanConstants;
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.common.FtpServerOptions;
 import au.org.arcs.griffin.server.FtpServer;
-import au.org.arcs.griffin.utils.IOUtils;
 import au.org.arcs.griffin.utils.LoggingOutputStream;
 import au.org.arcs.griffin.utils.NetUtils;
 import au.org.arcs.griffin.utils.SecurityUtil;
+import au.org.arcs.sftp.SftpForwardingFilter;
+import au.org.arcs.sftp.SftpPasswordAuthenticator;
+import au.org.arcs.sftp.SftpPublickeyAuthenticator;
+import au.org.arcs.sftp.SftpServerDetails;
+import au.org.arcs.sftp.SftpSessionFactory;
+import au.org.arcs.sftp.SftpShellFactory;
+import au.org.arcs.sftp.command.GridFTPCommandFactory;
+import au.org.arcs.sftp.command.ScpCommandFactory;
+import au.org.arcs.sftp.filesystem.GriffinFileSystemFactory;
+import au.org.arcs.sftp.utils.SftpLog;
+//import au.org.arcs.sftp.SftpSubsystem;
+//import au.org.arcs.sftp.filesystem.GriffinFileSystemFactory;
 
 /**
  * Griffin FTP application.
@@ -61,6 +79,9 @@ public final class FtpServerStarter {
 
     private static Log       log                         = LogFactory.getLog(FtpServerStarter.class);
 
+	private SshServer			sshd=null;
+	private SftpServerDetails	server_details=null;
+	private ApplicationContext appContext;
     /**
      * Constructor.
      */
@@ -137,7 +158,7 @@ public final class FtpServerStarter {
         	System.setProperty(FtpConstants.GRIFFIN_HOME,file.getParent());
 
         /* Prepare three main threads */
-        ApplicationContext appContext = getApplicationContext(beanRes, file);
+        appContext = getApplicationContext(beanRes, file);
         FtpServer svr = (FtpServer) appContext.getBean(BeanConstants.BEAN_SERVER);
 //        FtpServer sslsvr = (FtpServer) appContext.getBean(BeanConstants.BEAN_SSL_SERVER);
 //        ConsoleServer console = (ConsoleServer) appContext.getBean(BeanConstants.BEAN_CONSOLE);
@@ -173,6 +194,10 @@ public final class FtpServerStarter {
             serverList.add(svr);
 //            serverList.add(sslsvr);
             addShutdownHook(serverList);
+            if ("true".equalsIgnoreCase(svr.getSshEnabled())) {
+            	server_details=new SftpServerDetails("","");
+            	startSshServer();
+            }
             
         } catch (Exception e) {
             log.error("Unexpected error", e);
@@ -232,4 +257,127 @@ public final class FtpServerStarter {
             log.info("    " + key + ": " + value);
         }
     }
+    
+	/**
+	 * Starts the SFTP to Irods server. 
+	 */
+	public void startSshServer()
+	{	
+		try
+		{
+			//Init and load all the server details/option
+			//loads the application context details as Bean objects 
+			server_details.loadBeans();
+			KeyPairProvider keypair_provider=server_details.getKeyPairProvider();
+			
+			// Check local ip addresses
+			InetAddress addr = NetUtils.getMachineAddress(true);
+			if (addr == null)
+			{
+				log.error("No local network ip address available.");
+				System.exit(1);
+			}
+			//log server setup details
+			server_details.logSetup(log,addr);
+			
+			// Start server
+			runServer(keypair_provider);
+		}
+		catch (Exception e)
+		{
+			SftpLog.logError(log,e);
+		}
+		catch (Throwable t)
+		{
+			log.error("Unexpected Exception caught", t);
+		}
+	}
+	public SftpServerDetails getServerDetails()
+	{
+		return server_details;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @param keypair_provider
+	 *           key provider for SSH
+	 * @throws Exception
+	 *             run the SFTP to Irods server
+	 */
+	@SuppressWarnings("unchecked")
+	private void runServer(KeyPairProvider keypair_provider) throws Exception
+	{
+		// Set up a default ssh server
+		sshd = SshServer.setUpDefaultServer();
+		
+		//Increase the window & packet size used when creating ServerSessions:
+		//The Window is stored in the ChannelPipedInputStream for handling data flow
+ 		sshd.getProperties().put(SshServer.MAX_PACKET_SIZE, 
+ 							Integer.toString(SftpServerDetails.getInitialChannelPacketBytes()));
+		sshd.getProperties().put(SshServer.WINDOW_SIZE,
+							Integer.toString(SftpServerDetails.getInitialChannelWindowBytes()));
+		
+		//Set max concurrent connections
+		sshd.getProperties().put(ServerFactoryManager.MAX_CONCURRENT_SESSIONS, 
+							Integer.toString(getServerDetails().getOptions().getMaxUserConnections()));
+		
+		//Set server ident that is returned by server to client
+		sshd.getProperties().put(ServerFactoryManager.SERVER_IDENTIFICATION, 
+				getServerDetails().getAppProperties().getServerIdentification());
+
+
+		// Set the server options from the bean config file
+		sshd.setPort(getServerDetails().getOptions().getSftpPort());
+
+		//Set the host key SSH handler
+		sshd.setKeyPairProvider(keypair_provider);
+
+		//Shell handler
+		sshd.setShellFactory(new SftpShellFactory(getServerDetails()));
+		/*
+		if (OsUtils.isUNIX())
+		{
+			sshd.setShellFactory(new ProcessShellFactory(new String[]
+			{ "/bin/sh", "-i", "-l" }, EnumSet.of(ProcessShellFactory.TtyOptions.ONlCr)));
+		}
+		else
+		{
+			sshd.setShellFactory(new ProcessShellFactory(new String[]
+			{ "cmd.exe " }, EnumSet.of(ProcessShellFactory.TtyOptions.Echo, ProcessShellFactory.TtyOptions.ICrNl,
+					ProcessShellFactory.TtyOptions.ONlCr)));
+		}
+		*/
+		// Out own file handlers
+		sshd.setFileSystemFactory(new GriffinFileSystemFactory());
+		// Make our own derived sessions
+		sshd.setSessionFactory(new SftpSessionFactory());
+		// Make our own SFTP subsystem handler
+		sshd.setSubsystemFactories(Arrays.<NamedFactory<Command>> asList(new SftpSubsystem.Factory()));// ,
+		// Set default ScpCommandFactory
+		sshd.setCommandFactory(new ScpCommandFactory(new GridFTPCommandFactory(appContext)));
+		// Make our own Password Authenticator handler
+		sshd.setPasswordAuthenticator(new SftpPasswordAuthenticator(getServerDetails()));
+		// Make our own Public key Authenticator handler which does nothing but return false for now!
+		sshd.setPublickeyAuthenticator(new SftpPublickeyAuthenticator(getServerDetails()));
+		// Make our own filter class - just checks the griffin blacklist for now
+		sshd.setForwardingFilter(new SftpForwardingFilter(getServerDetails()));
+		//update any loaded option to the server
+		//updateServerOptions(sshd.getSessionConfig());
+		//Start her up
+		
+		//sshd.setReuseAddress(false);
+		sshd.start();
+		
+		//Signal success
+		String successMsg=getServerDetails().getAppTitle()+" is running on Port: "+server_details.getOptions().getSftpPort()+"...";
+		log.info(successMsg);
+		System.err.println(successMsg);
+	}
+
+	public void stopServer() throws InterruptedException
+	{
+		sshd.stop();
+	}
+
 }

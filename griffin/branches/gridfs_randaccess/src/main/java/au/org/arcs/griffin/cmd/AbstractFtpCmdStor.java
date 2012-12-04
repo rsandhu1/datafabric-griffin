@@ -117,14 +117,15 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
                 getCtx().getTransferMonitor().sendPerfMarker();
                 Thread thread = new Thread(provider);
                 thread.start();
-                try {
-                    if (thread.isAlive()) {
-                        thread.join();
-                    }
-                } catch (InterruptedException e) {
-                    log.warn("interrupted exception, this is logged and ignored");
-                    e.printStackTrace();
-                }
+                provider.transferData();
+//                try {
+//                    if (thread.isAlive()) {
+//                        thread.join();
+//                    }
+//                } catch (InterruptedException e) {
+//                    log.warn("interrupted exception, this is logged and ignored");
+//                    e.printStackTrace();
+//                }
 //                provider.closeProvider();
                 log.info("transfer is complete");
             } else {  // Stream mode

@@ -182,7 +182,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 	
 
 	public void prepare() throws IOException {
-		if (direction==DataChannel.DIRECTION_GET) sis=new SynchronizedInputStream(new RafInputStream(fileObject, offset), offset);
+		if (direction==DataChannel.DIRECTION_GET) sis=new SynchronizedInputStream(fileObject.getInpuStream(offset), offset, ctx.getBufferSize());
 		if (channels==null||channels.size()<maxThread){
 //			log.debug("new provider, init'ing...");
 			if (channels==null) channels=new ArrayList<DataChannel>();
@@ -238,4 +238,41 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 		return this.isUsed;
 	}
 
+	public SynchronizedInputStream getSis() {
+		return sis;
+	}
+
+	@Override
+	public void transferData() throws IOException {
+		Thread[] transferThreads=new Thread[channels.size()];
+		for (int i=0;i<channels.size();i++){
+			transferThreads[i]=new Thread(channels.get(i));
+		}
+		for (int i=0;i<channels.size();i++){
+			transferThreads[i].start();
+		}
+		sis.feedQueue();
+		sis.addEndingMarker(channels.size());
+		for (int i=0;i<channels.size();i++){
+			if (transferThreads[i].isAlive())
+				try {
+					log.debug("thread "+i+" joined.");
+					transferThreads[i].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		log.debug("all threads finished(?) channels.size()="+channels.size());
+		if (sis!=null){
+			try {
+				sis.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			sis=null;
+		}
+	}
+	
 }

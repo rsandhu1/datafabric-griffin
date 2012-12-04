@@ -2,6 +2,7 @@ package au.org.arcs.griffin.streams;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,14 +15,17 @@ public class SynchronizedInputStream {
 	private InputStream in;
 //	private boolean eof;
 //	private int endding;
+	private ArrayBlockingQueue<EDataBlock> dataQueue;
+	private int bufferSize;
 	
-	public SynchronizedInputStream(InputStream in){
-		this.in=in;
-		this.idx=0;
+	public SynchronizedInputStream(InputStream in, int bufferSize){
+		this(in,0,bufferSize);
 	}
-	public SynchronizedInputStream(InputStream in, long offset){
+	public SynchronizedInputStream(InputStream in, long offset, int bufferSize){
 		this.in=in;
 		this.idx=offset;
+		this.dataQueue=new ArrayBlockingQueue<EDataBlock>(10);
+		this.bufferSize=bufferSize;
 	}
 	
 //	@Override
@@ -51,21 +55,59 @@ public class SynchronizedInputStream {
 //		return super.read(b);
 //	}
 	
-	synchronized public int read(EDataBlock eDataBlock) throws IOException {
-		byte[] b=new byte[(int) eDataBlock.getPreferredBufferSize()];
-		int count=in.read(b);
-		if (count>-1) {
+	public void feedQueue() throws IOException{
+		byte[] b=new byte[bufferSize];
+		int count;
+		while ((count = in.read(b))>-1){
+			EDataBlock eDataBlock=new EDataBlock("main-thread", bufferSize);
+			eDataBlock.clearHeader();
 			log.debug("read offset="+idx+" length="+count);
 			eDataBlock.setOffset(idx);
 			eDataBlock.setSize(count);
 			eDataBlock.setData(b);
 			idx+=count;
+			try {
+				dataQueue.put(eDataBlock);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
 		}
-		return count;
+	}
+	
+	synchronized public int read(EDataBlock eDataBlock) throws IOException {
+		try {
+			EDataBlock nextBlock=dataQueue.take();
+			eDataBlock.clearHeader();
+			eDataBlock.setOffset(nextBlock.getOffset());
+			eDataBlock.setSize(nextBlock.getSize());
+			eDataBlock.setData(nextBlock.getData());
+			return (int) nextBlock.getSize();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
 	}
 	
 	public void close() throws IOException{
 		in.close();
+	}
+	
+	public void addEndingMarker(int threadNum){
+		for (int i=0;i<threadNum;i++) {
+			EDataBlock eDataBlock=new EDataBlock("main-thread", bufferSize);
+			eDataBlock.clearHeader();
+			eDataBlock.setOffset(0);
+			eDataBlock.setSize(-1);
+			try {
+				dataQueue.put(eDataBlock);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

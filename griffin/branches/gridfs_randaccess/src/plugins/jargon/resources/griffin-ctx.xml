@@ -142,11 +142,31 @@
 				<prop key="service.key">/etc/grid-security/hostkey.pem</prop>
 				<prop key="service.cert">/etc/grid-security/hostcert.pem</prop>
 				<prop key="service.trusted.certs">/etc/grid-security/certificates</prop>
-				<!-- <prop key="ipv4.black.list">!127.0.0.1,!192.*.*.*</prop> -->
 			</props>
 		</property>
 	</bean>
 
+	<bean id="sftpirods-options" class="au.org.arcs.sftpirods.config.SftpConfigProperties" singleton="true">
+	    <constructor-arg>
+	      <props>
+	        <!-- Optional include the SFTP Server Label, overrides the Label stored in app.properties-->
+	        <prop key="server.label">sFTP to iRods Server</prop>
+	        <!-- Must include the SResource location-->
+	        <prop key="resources.name">sftpirods-res</prop>
+	        <!-- Must include the SSH host key file location-->
+	        <prop key="sftp.hostkey.file">/ARCS/key.ser</prop>
+	        <!-- Default server port to use. 22 is the SFTP default, but we use 8080 by default to avoid conflicts with general SSH usage-->
+	        <prop key="sftp.port">8080</prop>
+	        <!-- If don't include sftp.home.dir assumes directory containing this file-->
+	        <!-- <prop key="sftp.home.dir">/ARCS</prop> -->
+	        <!-- If don't include sftp.log.dir assumes /logs inside directory containing this file-->
+	        <!-- <prop key="sftp.log.dir">/ARCS/logs</prop> -->
+	        <!-- List of IP adresses to block -->
+	        <!-- <prop key="ipv4.black.list">!127.0.0.1,!192.*.*.*</prop> -->
+		    </props>
+	    </constructor-arg>
+	</bean>
+	
 	<bean id="cmdReader" class="au.org.arcs.griffin.parser.impl.FtpCmdReaderThread" singleton="false">
 		<property name="parser" ref="parser" />
 	</bean>
@@ -155,18 +175,29 @@
 		<property name="cmdReader" ref="cmdReader" />
 	</bean>
 
+	<bean id="gridftpCommand" class="au.org.arcs.sftp.command.GridFTPCommand" singleton="false">
+		<property name="cmdReader" ref="cmdReader" />
+		<property name="options" ref="options" />
+		<property name="resources" value="griffin-resources"/>
+		<property name="fileSystem" ref="fileSystem" />
+		<property name="ftpEventListener" ref="server" />
+	</bean>
+	
 	<bean id="server" class="au.org.arcs.griffin.server.impl.GsiFtpServer" singleton="true">
 		<property name="name" value="GSI FTP Server" />
 		<property name="options" ref="options" />
 		<property name="resources" value="griffin-resources"/>
 		<property name="fileSystem" ref="fileSystem" />
+		<property name="sshEnabled" value="true"/>
 	</bean>
 	
 	<bean id="fileSystem" class="au.org.arcs.griffin.filesystem.impl.jargon.JargonFileSystemImpl" singleton="true">
 		<property name="serverName" value="localhost" />
 		<property name="serverPort" value="1247" />
-		<property name="serverType" value="irods" />
-		<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
+		<property name="zoneName" value="testZone" />
+		<property name="defaultAuthType" value="pam" />
+		<property name="jargonInternalCacheBufferSize" value="512000" />
+						<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
 		<!-- 
 		<property name="mapFile" value="irods-mapfile" />
 		 -->

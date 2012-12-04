@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.Date;
@@ -98,9 +99,9 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
 
     private Socket              clientSocket;
 
-    private BufferedReader      clientCmdReader;
+    protected BufferedReader      clientCmdReader;
 
-    private PrintWriter         clientResponseWriter;
+    protected PrintWriter         clientResponseWriter;
 
     private FtpServerOptions    options;
 
@@ -124,7 +125,7 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
     
     private GSSName gssIdentity;
     
-    private FileSystemConnection fileSystemConnection;
+    protected FileSystemConnection fileSystemConnection;
     
     private int parallelStart;
     private int parallelMin;
@@ -138,6 +139,10 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
     
     private int dcauType;
     private TransferMonitor transferMonitor;
+    
+    private int controlChannelMode;
+    private InetAddress clientInetAddress;
+    private InetAddress localInetAddress;
 
     /**
      * Constructor.
@@ -814,4 +819,37 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
     public void setDCAU(int dcauType) {
         this.dcauType = dcauType;
     }
+
+	@Override
+	public int getControlChannelMode() {
+		// TODO Auto-generated method stub
+		return this.controlChannelMode;
+	}
+
+	@Override
+	public void setControlChannelMode(int mode) {
+		// TODO Auto-generated method stub
+		this.controlChannelMode=mode;
+		this.authenticated=true;
+	}
+
+	public InetAddress getClientInetAddress() {
+		if (this.clientSocket!=null) return clientSocket.getInetAddress();
+		return clientInetAddress;
+	}
+
+	public void setClientInetAddress(InetAddress clientInetAddress) {
+		this.clientInetAddress = clientInetAddress;
+	}
+
+	public InetAddress getLocalInetAddress() {
+		if (this.clientSocket!=null) return clientSocket.getLocalAddress();
+		return localInetAddress;
+	}
+
+	public void setLocalInetAddress(InetAddress localInetAddress) {
+		this.localInetAddress = localInetAddress;
+	}
+	
+	
 }
