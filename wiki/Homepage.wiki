@@ -41,7 +41,8 @@ GridFTP settings are
                  <prop key="max.connections">20</prop>
                  <prop key="max.idle.seconds">600</prop>
                  <prop key="buffer.size">2048000</prop>
-                 <prop key="allowed.passive.ports">40000-41000</prop>
+ 		 <prop key="allowed.passive.tcp.ports">40000-41000</prop>
+		 <prop key="allowed.passive.udp.ports">40000-41000</prop>
                  <prop key="ftp.port">2811</prop>
                  <prop key="charset.ebcdic">CP1047</prop>
                  <prop key="charset.ascii">UTF-8</prop>
