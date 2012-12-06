@@ -20,6 +20,7 @@ sed "s@GRIFFIN_HOME_PLACE_HOLDER@$GRIFFIN_HOME@g" \
 mkdir -p $GRIFFIN_HOME
 mkdir $GRIFFIN_HOME/logs
 mkdir $GRIFFIN_HOME/lib
+mkdir $GRIFFIN_HOME/plugins
 cp dist/*.jar $GRIFFIN_HOME
 cp lib/main/*.jar $GRIFFIN_HOME/lib
 
@@ -28,6 +29,9 @@ sed "s@GRIFFIN_HOME_PLACE_HOLDER@$GRIFFIN_HOME@g" \
     src/main/resources/log4j.properties > $GRIFFIN_HOME/log4j.properties
 
 echo "Done."
-echo "Now, make sure adequate griffin-ctx.xml and griffin-users.xml"
-echo "are copied to $GRIFFIN_HOME."
+echo "**************************"
+echo "Now, make sure adequate griffin-ctx.xml (possibly griffin-users.xml)"
+echo "are copied to $GRIFFIN_HOME, as well as xxx-plugin.jar and JARs"
+echo "required for it to $GRIFFIN_HOME/plugins."
+echo "**************************"
 exit 0
