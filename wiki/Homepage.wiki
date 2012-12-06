@@ -8,7 +8,7 @@ Griffin is a GridFTP interface for arbitrary data sources.
 
 To install, download the tar.gz file and extract. Then run
 {{{
-bin/install.sh GRIFFIN_HOME
+bin/install.sh $GRIFFIN_HOME
 }}}
 e.g.
 {{{
@@ -23,10 +23,19 @@ APP_USER=non-root-user
 }}}
  * Change the permissions of installed files. Usually that means that the the `logs` directory has to be for example assigned to a group that the user can write to, and add group write privileges to it.
  * Make sure this user has access to host certificate/key files
+ * The plugin JAR file (`xxx-plugin.jar`) needs to be placed in the `$GRIFFIN_HOME/plugins` directory along with all required libraries (jar files).
+ * Use `/etc/init.d/griffin` to start/stop. (For debugging the option "`check`" to the init script may help.)
+ * For verification, inspect the log file under `$GRIFFIN_HOME/logs/griffin.log`
 
-Use `/etc/init.d/griffin` to start/stop.
+=== Build from Sources ===
+If you build from sources, stay in the source folder's root directory, and build using ANT:
 
-(For debugging the option "`check`" to the init script may help.)
+{{{
+ant
+ant -Dplugin=xxx
+}}}
+
+The `xxx` is a place holder for the plugin, and can be one of `jargon`, `localfs`, `mongodb` or `irods-conductor`. Some of these implementations may not be complete or work at a given moment.
 
 === Configuration ===
 The main configuration file is `$GRIFFIN_HOME/griffin-ctx.xml`
