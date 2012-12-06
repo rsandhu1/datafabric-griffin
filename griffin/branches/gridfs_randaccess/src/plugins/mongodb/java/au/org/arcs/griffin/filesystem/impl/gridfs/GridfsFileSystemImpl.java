@@ -4,15 +4,15 @@
  * Implementation of a general file system connecting to MongoDB GridFS.
  * 
  * Created: 2010-10-07 Guy K. Kloss <guy.kloss@aut.ac.nz>
- * Changed:
+ * Changed: 2012-12-06 Guy K. Kloss <guy.kloss@aut.ac.nz>
  * 
  * Version: $Id$
  * 
- * Copyright (C) 2010 Auckland University of Technology, New Zealand
+ * Copyright (C) 2012 Auckland University of Technology, New Zealand
  * 
- * All rights reserved
+ * Some rights reserved
  * 
- * http://www.xxx.ac.nz/~gkloss/
+ * http://www.aut.ac.nz/
  */
  
 package au.org.arcs.griffin.filesystem.impl.gridfs;
@@ -39,10 +39,10 @@ import au.org.arcs.griffin.filesystem.FileSystemConnection;
 public class GridfsFileSystemImpl implements FileSystem {
 
     private String _serverName = null;
-    private int _serverPort = GridfsConstants.SERVER_PORT;
+    private int _serverPort = GridfsConstants.DEFAULT_SERVER_PORT;
     private String _serverType = GridfsConstants.SERVER_TYPE;
     private String _dbName = null;
-    private String _bucket = GridfsConstants.BUCKET_NAME;
+    private String _bucketName = GridfsConstants.BUCKET_NAME;
     private String _user = null;
     private char[] _password = null;
     
@@ -83,14 +83,18 @@ public class GridfsFileSystemImpl implements FileSystem {
                                                       this._serverPort,
                                                       this._serverType,
                                                       this._dbName,
-                                                      this._bucket,
+                                                      this._bucketName,
                                                       this._user,
                                                       this._password,
                                                       credential);
         } catch (NullPointerException e) {
+            log.error("Could not connect to MongoDB: '"
+                      + e.getStackTrace().toString());
             throw new FtpConfigException("Problem with GridFS storage backend configuration: "
                                          + e.getMessage());
         } catch (GSSException e) {
+            log.error("Problem with access credentials: '"
+                      + e.getMessage());
             throw new FtpConfigException("Problem with access credentials: "
                                          + e.getMessage());
         }
@@ -199,18 +203,18 @@ public class GridfsFileSystemImpl implements FileSystem {
 
     /**
      * Gets GridFS bucket name for storage.
-     * @return Returns the bucket.
+     * @return Returns the bucket name.
      */
-    public String getBucket() {
-        return _bucket;
+    public String getBucketName() {
+        return _bucketName;
     }
 
     /**
      * Sets GridFS bucket name for storage.
-     * @param bucket The bucket to set.
+     * @param bucketName The bucket name to set.
      */
-    public void setBucket(String bucket) {
-        this._bucket = bucket;
+    public void setBucketName(String bucketName) {
+        this._bucketName = bucketName;
     }
 
     /**

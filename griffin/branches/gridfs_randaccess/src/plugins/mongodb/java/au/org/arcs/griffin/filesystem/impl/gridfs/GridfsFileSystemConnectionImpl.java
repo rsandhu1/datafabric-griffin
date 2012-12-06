@@ -4,15 +4,15 @@
  * Implementation for access of a MongoDB GridFS storage resource.
  * 
  * Created: 2010-09-19 Guy K. Kloss <g.kloss@massey.ac.nz>
- * Changed:
+ * Changed: 2012-12-06 Guy K. Kloss <guy.kloss@aut.ac.nz>
  * 
  * Version: $Id$
  * 
- * Copyright (C) 2010 Massey University, New Zealand
+ * Copyright (C) 2012 Auckland University of Technology, New Zealand
  * 
- * All rights reserved
+ * Some rights reserved
  * 
- * http://www.massey.ac.nz/~gkloss/
+ * http://www.aut.ac.nz/
  */
  
 package au.org.arcs.griffin.filesystem.impl.gridfs;
@@ -63,7 +63,7 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
      *            Configured type of server.
      * @param dbName
      *            Database name on MongoDB server that hosts the GridFS.
-     * @param bucket
+     * @param bucketName
      *            DB's "bucket" (collection) used for storing the files.
      * @param user
      *            User name for authenticated access to database (empty string
@@ -79,7 +79,7 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
             int serverPort,
             String serverType,
             String dbName,
-            String bucket,
+            String bucketName,
             String user,
             char[] password,
             GSSCredential credential) throws IOException {
@@ -89,25 +89,40 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
             return;
         }
         
+        // Set defaults if values not present:
+        if (serverPort == 0) {
+            serverPort = GridfsConstants.DEFAULT_SERVER_PORT;
+        }
+        if (serverName == null) {
+            serverName = GridfsConstants.DEFAULT_SERVER_HOST;
+        }
+        if (bucketName == null) {
+            bucketName = GridfsConstants.BUCKET_NAME;
+        }
+        
         this._credential = credential;
         
         try {
-            log.debug("GridFS server: " + serverName
+            log.debug("MongoDB/GridFS server: " + serverName
                       + ", port: " + serverPort
                       + ", DB name: " + dbName);
             this._mongoInstance = new Mongo(serverName, serverPort);
             this._db = this._mongoInstance.getDB(dbName);
-            if (!user.isEmpty()) {
+            log.debug("Got connection to MongoDB.");
+            if (user != null && !user.isEmpty()) {
                 this._db.authenticate(user, password);
+                log.debug("Authenticated at MongoDB with user \""
+                          + user + "\".");
             }
-            this._fs = new GridFS(this._db, bucket);
+            this._fs = new GridFS(this._db, bucketName);
+            log.debug("Established connection to GridFS.");
         } catch (UnknownHostException e) {
-            log.error("Could not connect to MongoDB host '"
-                      + serverName + "': " + e.getStackTrace());
+            log.error("Could not connect to storage host DB '"
+                      + serverName + "': " + e.getMessage());
             throw new IOException(e.getMessage());
         } catch (MongoException e) {
             log.error("Could not connect to MongoDB database: "
-                      + e.getStackTrace());
+                      + e.getMessage());
             throw new IOException(e.getMessage());
         }
     }
@@ -153,8 +168,8 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
      * @see au.org.arcs.griffin.filesystem.FileSystemConnection#getHomeDir()
      */
     public String getHomeDir() {
-        // We don't have home directories as we don't have user accounts.
-        return null;
+        // We don't have home directories as we don't track (local) user accounts.
+        return "/";
     }
 
     /**
