@@ -21,7 +21,8 @@ mkdir -p $GRIFFIN_HOME
 mkdir $GRIFFIN_HOME/logs
 mkdir $GRIFFIN_HOME/lib
 mkdir $GRIFFIN_HOME/plugins
-cp dist/*.jar $GRIFFIN_HOME
+cp dist/griffin.jar $GRIFFIN_HOME  
+cp dist/*-plugin.jar $GRIFFIN_HOME/plugins
 cp lib/main/*.jar $GRIFFIN_HOME/lib
 
 # Prepare and copy the logging configuration.
