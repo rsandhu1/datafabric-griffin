@@ -3,16 +3,16 @@
  * 
  * File object that links to the GridFS instance.
  * 
- * Created: 2010-09-18 Guy K. Kloss <g.kloss@massey.ac.nz>
+ * Created: 2010-09-18 Guy K. Kloss <guy.kloss@aut.ac.nz>
  * Changed:
  * 
  * Version: $Id$
  * 
- * Copyright (C) 2010 Massey University, New Zealand
+ * Copyright (C) 2012 Auckland University of Technology, New Zealand
  * 
- * All rights reserved
+ * Some rights reserved
  * 
- * http://www.massey.ac.nz/~gkloss/
+ * http://www.aut.ac.nz/
  */
  
 package au.org.arcs.griffin.filesystem.impl.gridfs;
@@ -125,12 +125,13 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#isDirectory()
      */
     public boolean isDirectory() {
-        if (this._exists
-                && this._fileHandle.getContentType().equals("collection")) {
-            return true;
-        } else {
-            return false;
+        if (this._exists) {
+            String contentType = this._fileHandle.getContentType();
+            if (contentType != null && contentType.equals("collection")) {
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -227,9 +228,9 @@ public class GridfsFileObject implements FileObject {
      *
      * @see au.org.arcs.griffin.filesystem.FileObject#getRandomAccessFileObject(java.lang.String)
      */
-    public RandomAccessFileObject getRandomAccessFileObject(String type)
+    public RandomAccessFileObject getRandomAccessFileObject(String mode)
             throws IOException {
-        return new GridfsRandomAccessFileObjectImpl(this, type);
+        return new GridfsRandomAccessFileObjectImpl(this, mode);
     }
 
     /**

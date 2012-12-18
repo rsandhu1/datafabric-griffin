@@ -3,16 +3,16 @@
  * 
  * Implementation for doing a direct file access onto GridFS stored content. 
  * 
- * Created: 2010-09-23 Guy K. Kloss <g.kloss@massey.ac.nz>
+ * Created: 2010-09-23 Guy K. Kloss <guy.kloss@aut.ac.nz>
  * Changed:
  * 
  * Version: $Id$
  * 
- * Copyright (C) 2010 Massey University, New Zealand
+ * Copyright (C) 2012 Auckland University of Technology, New Zealand
  * 
- * All rights reserved
+ * Some rights reserved
  * 
- * http://www.massey.ac.nz/~gkloss/
+ * http://www.aut.ac.nz/
  */
 
 package au.org.arcs.griffin.filesystem.impl.gridfs;
@@ -44,6 +44,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
     private String _accessMode = null;
     private OutputStream _newFileOutStream = null;
     private GridFSInputFile _newOutputFile = null;
+    private InputStream _readInputStream = null;
 
     /**
      * Constructor.
@@ -51,7 +52,9 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @param fileHandle
      *            GridFS file handle.
      * @param mode
-     *            Access mode for file system operations.
+     *            File access mode, @see java.io.RandomAccessFile. Mostly 
+     *            "r" and "rw" should be supported.
+     *            
      */
     public GridfsRandomAccessFileObjectImpl(GridfsFileObject fileHandle,
             String mode) {
@@ -92,9 +95,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read()
      */
     public int read() throws IOException {
-        this._checkPermissions("r");
-        return ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream()
-                                                                .read();
+        return _getReadInputStream().read();
     }
 
     /**
@@ -103,9 +104,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read(byte[])
      */
     public int read(byte[] b) throws IOException {
-        this._checkPermissions("r");
-        return ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream()
-                                                                .read(b);
+        return _getReadInputStream().read(b);
     }
 
     /**
@@ -114,10 +113,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read(byte[], int, int)
      */
     public int read(byte[] b, int off, int len) throws IOException {
-        this._checkPermissions("r");
-        return ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream()
-                                                                .read(b, off,
-                                                                      len);
+        return _getReadInputStream().read(b, off, len);
     }
 
     /**
@@ -151,7 +147,6 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#write(int)
      */
     public void write(int b) throws IOException {
-        this._checkPermissions("w");
         this._getNewFileOutputStream().write(b);
     }
 
@@ -161,7 +156,6 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#write(byte[])
      */
     public void write(byte[] b) throws IOException {
-        this._checkPermissions("w");
         this._getNewFileOutputStream().write(b);
     }
 
@@ -172,7 +166,6 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      *      int, int)
      */
     public void write(byte[] b, int off, int len) throws IOException {
-        this._checkPermissions("w");
         this._getNewFileOutputStream().write(b, off, len);
     }
 
@@ -192,22 +185,6 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
     }
 
     /**
-     * Checks permissions for current file in access.
-     * 
-     * @param action
-     *            File system action ("r" for reading, "w" for writing).
-     * @throws IOException
-     *             if access permission is not given.
-     */
-    private void _checkPermissions(String action) throws IOException {
-        String userName = this._fileHandle.getConnection().getUser();
-        if (this._accessMode.contains(action)) {
-            throw new IOException("File access \"" + action
-                                  + "\" not permitted.");
-        }
-    }
-
-    /**
      * Returns an output stream for a new writable file.
      * 
      * @return a handle to the stream.
@@ -221,4 +198,17 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
         }
         return this._newFileOutStream;
     }
+    
+    /**
+     * Returns an input stream for a readable file.
+     * 
+     * @return a handle to the stream.
+     */
+    private InputStream _getReadInputStream() {
+        if (_readInputStream == null) {
+            _readInputStream = ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream();
+        }
+        return _readInputStream;
+    }
+    
 }
