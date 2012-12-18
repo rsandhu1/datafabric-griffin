@@ -82,7 +82,7 @@ public interface FileObject {
      * Returns an object that can be used for reading/writing data.
      * 
      * @param mode File access mode, @see java.io.RandomAccessFile. Mostly 
-     *          "r" and "rw" should be suppported.
+     *          "r" and "rw" should be supported.
      * @return The random access file object.
      * @throws IOException If file access fails or privileges are insufficient.
      */

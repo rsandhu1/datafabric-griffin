@@ -113,6 +113,7 @@ public class FtpCmdRetr extends AbstractFtpCmdRetr {
                 if (isAbortRequested()) {
                     msgOut(MSG426);
                     log.debug("File transfer aborted");
+                    is.close();
                     return;
                 }
                 getCtx().getTransferMonitor().execute(start,count);

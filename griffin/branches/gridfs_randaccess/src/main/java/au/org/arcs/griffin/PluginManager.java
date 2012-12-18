@@ -163,6 +163,9 @@ public final class PluginManager {
             Method startup = clazz.getMethod(startMethod, new Class[] {(new String[0]).getClass()});
             startup.invoke(instance, new Object[] {args});
         } catch (Exception e) {
+            log.error("Problem dynamically obtaining/instantiating class '"
+                      + mainClassName + "' and running method '"
+                      + startMethod + "(...)'.");
             log.error(e, e);
         }
     }

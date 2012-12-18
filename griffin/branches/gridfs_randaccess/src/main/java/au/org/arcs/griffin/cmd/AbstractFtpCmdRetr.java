@@ -170,25 +170,21 @@ public abstract class AbstractFtpCmdRetr extends AbstractFtpCmd implements FtpCo
                                                      .getCurrentTransferRate());
             msgOut(MSG226);
         } catch (FtpQuotaException e) {
-            log.error(e.toString());
+            log.error(e);
             msgOut(MSG550, e.getMessage());
             log.warn(e.getMessage());
         } catch (FtpPermissionException e) {
-            log.error(e.toString());
+            log.error(e, e);
             msgOut(MSG550_PERM);
         } catch (UnsupportedEncodingException e) {
-            log.error(e.toString());
+            log.error(e, e);
             msgOut(MSG550, "Unsupported Encoding: " + charset);
-            log.error(e.toString());
         } catch (IOException e) {
-            log.error(e.toString());
+            log.error(e, e);
             msgOut(MSG550);
-            log.error(e.toString());
         } catch (RuntimeException e) {
-        	e.printStackTrace();
-            log.error(e.toString());
+        	log.error(e, e);
             msgOut(MSG550);
-            log.error(e.toString());
         } finally {
             log.debug("in finally");
             if (mode == MODE_STREAM) {
