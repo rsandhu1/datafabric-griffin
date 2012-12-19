@@ -52,6 +52,7 @@ public class GridfsFileObject implements FileObject {
     private GridFSFile _fileHandle = null;
     
     private boolean _exists = false;
+    private boolean _implicitEntry = false;
     private GridfsFileSystemConnectionImpl _connection = null;
     
     /**
@@ -71,15 +72,26 @@ public class GridfsFileObject implements FileObject {
         
         DBObject query = new BasicDBObject("filename", path);
         DBCursor results = this._connection.getFs().getFileList(query);
-        if (results.count() == 0) {
-            this._exists = false;
-            return;
+        if (results.count() > 0) {
+            DBObject newest = results.sort(new BasicDBObject("uploadDate", -1)).limit(1).next();
+            ObjectId newest_id = new ObjectId(newest.get("_id").toString());
+            this._fileHandle = this._connection.getFs().find(newest_id); 
+            this._exists = true;   
+        } else {
+            // This entry might be a directory without a specific entry with
+            // contentType == "collection". Let's check for that ...
+            String pathEscaped = path.replace(GridfsConstants.FILE_SEP,
+                                              "\\" + GridfsConstants.FILE_SEP);
+            pathEscaped = pathEscaped.replace(".", "\\.");
+            Pattern searchPattern = Pattern.compile("^" + pathEscaped + "\\/");
+            query = new BasicDBObject("filename", searchPattern);
+            List<GridFSDBFile> foundEntries = this._connection.getFs().find(query);
+            
+            if (foundEntries.size() > 0) {
+                this._exists = true;
+                this._implicitEntry = true;
+            }
         }
-
-        DBObject newest = results.sort(new BasicDBObject("uploadDate", -1)).limit(1).next();
-        ObjectId newest_id = new ObjectId(newest.get("_id").toString());
-        this._fileHandle = this._connection.getFs().find(newest_id); 
-        this._exists = true;
     }
 
     /**
@@ -126,9 +138,15 @@ public class GridfsFileObject implements FileObject {
      */
     public boolean isDirectory() {
         if (this._exists) {
-            String contentType = this._fileHandle.getContentType();
-            if (contentType != null && contentType.equals("collection")) {
+            if (this._implicitEntry) {
+                // This entry exists implicitly as files below this directory
+                // level exist.
                 return true;
+            } else {
+                String contentType = this._fileHandle.getContentType();
+                if (contentType != null && contentType.equals("collection")) {
+                    return true;
+                }
             }
         }
         return false;
@@ -169,7 +187,8 @@ public class GridfsFileObject implements FileObject {
         
         String pathEscaped = this.getPath().replace(GridfsConstants.FILE_SEP,
                                                     "\\" + GridfsConstants.FILE_SEP);
-        Pattern searchPattern = Pattern.compile("/^" + pathEscaped);
+        pathEscaped = pathEscaped.replace(".", "\\.");
+        Pattern searchPattern = Pattern.compile("^" + pathEscaped + "\\/");
         DBObject query = new BasicDBObject("filename", searchPattern);
         List<GridFSDBFile> foundEntries = this._connection.getFs().find(query);
         
@@ -185,8 +204,12 @@ public class GridfsFileObject implements FileObject {
             String itemPath = item.getFilename();
             int index = itemPath.indexOf(GridfsConstants.FILE_SEP,
                                          this._path.length());
-            String subPath = itemPath.substring(0, index);
-            uniqueEntries.add(subPath);
+            String subPath = itemPath.substring(index + 1);
+            index = subPath.indexOf('/');
+            if (index >= 0) {
+                subPath = subPath.substring(0, index + 1);
+            }
+            uniqueEntries.add(this.getPath() + GridfsConstants.FILE_SEP + subPath);
         }
 
         FileObject[] results = new FileObject[uniqueEntries.size()];
@@ -205,7 +228,7 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#length()
      */
     public long length() {
-        if (this._exists) {
+        if (this._exists && !this._implicitEntry) {
             return this._fileHandle.getLength();
         }
         return 0;
@@ -217,7 +240,7 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#lastModified()
      */
     public long lastModified() {
-        if (this._exists) {
+        if (this._exists && !this._implicitEntry) {
             return this._fileHandle.getUploadDate().getTime();
         }
         return 0L;
@@ -239,7 +262,7 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#delete()
      */
     public boolean delete() {
-        if (this._exists) {
+        if (this._exists && !this._implicitEntry) {
             this._connection.getFs().remove(this._path);
             return true;
         } else {
@@ -268,7 +291,7 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#mkdir()
      */
     public boolean mkdir() {
-        if (!this._exists) {
+        if (!this._exists || this._implicitEntry) {
             GridFSInputFile newEntry = this._connection.getFs().createFile(new byte[0]);
             newEntry.setContentType("collection");
             newEntry.setFilename(this._path);
@@ -285,7 +308,7 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#renameTo(au.org.arcs.griffin.filesystem.FileObject)
      */
     public boolean renameTo(FileObject file) {
-        if (this._exists) {
+        if (this._exists && !this._implicitEntry) {
             this._fileHandle.put("filename", file.getName());
             this._fileHandle.save();
             return true;
@@ -301,8 +324,12 @@ public class GridfsFileObject implements FileObject {
      */
     public boolean setLastModified(long t) {
         if (this._exists) {
-            this._fileHandle.put("uploadDate", new Date(t));
-            this._fileHandle.save();
+            if (this._implicitEntry) {
+                this.mkdir();
+            } else {
+                this._fileHandle.put("uploadDate", new Date(t));
+                this._fileHandle.save();
+            }
             return true;
         } else {
             return false;
