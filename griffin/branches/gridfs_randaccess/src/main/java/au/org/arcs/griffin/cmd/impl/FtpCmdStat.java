@@ -64,7 +64,7 @@ public class FtpCmdStat extends AbstractFtpCmd {
         String clientHost = getCtx().getClientInetAddress().getHostAddress();
         String msg = getCtx().getUser() + "(" + clientHost + ")";
         msgOut(MSG211_STAT, new Object[] {msg});
-        Map<String, Long> map = new HashMap(); //getCtx().getUserManager().getUserStatistics(getCtx().getUser());
+        Map<String, Long> map = new HashMap<String, Long>(); //getCtx().getUserManager().getUserStatistics(getCtx().getUser());
         String arg = getArguments();
         if (arg.length() == 0) {
             printUserStatistics(map);
