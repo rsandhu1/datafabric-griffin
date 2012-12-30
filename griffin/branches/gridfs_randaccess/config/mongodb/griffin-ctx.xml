@@ -171,48 +171,7 @@
         <property name="fileSystem" ref="fileSystem" />
     </bean>
     
-<!-- Config for iRODS/Jargon file system -->
-    <bean id="fileSystem"
-            class="au.org.arcs.griffin.filesystem.impl.jargon.JargonFileSystemImpl"
-            singleton="true">
-        <property name="serverName" value="arcs-df.vpac.org" />
-        <property name="serverPort" value="1247" />
-        <property name="serverType" value="irods" />
-        <!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
-        <property name="mapFile" value="irods-mapfile" />
-        <!-- update interval, default is 10 mins -->
-        <!-- <property name="updateInterval" value="10" /> -->
-        <!-- Default resource can be specified here. 
-             If no default resource is specified, \
-             it will be decided by the rule engine. -->
-        <!-- <property name="defaultResource" value="arcs-df.vpac.org" /> -->
-    </bean>
-<!-- END Config for iRODS/Jargon file system -->
-    
-<!-- Config for local file system -->
-<!-- 
-    <bean id="fileSystem"
-            class="au.org.arcs.griffin.filesystem.impl.localfs.LocalFileSystemImpl"
-            singleton="true">
-        <property name="rootPath" value="/data/testroot" />
-        <property name="userManager" ref="userManager" />
-    </bean>
-    
-    <bean id="userFileReader"
-            class="au.org.arcs.griffin.usermanager.impl.XmlFileReader"
-            singleton="true">
-    </bean>
-
-    <bean id="userManager"
-            class="au.org.arcs.griffin.usermanager.impl.XmlFileUserManager"
-            singleton="true">
-        <property name="fileReader" ref="userFileReader" />
-    </bean>
--->
-<!-- END Config for local file system -->
-    
 <!-- Config for MongoDB GridFS file system -->
-<!-- 
     <bean id="fileSystem"
             class="au.org.arcs.griffin.filesystem.impl.gridfs.GridfsFileSystemImpl"
             singleton="true">
@@ -221,8 +180,9 @@
         <property name="serverPort" value="27017" />
         <property name="dbName" value="test" />
         <property name="bucketName" value="fs" />
+        <property name="defaultPermissions" value="420" /> <!-- octal: 0644 -->        
+        <property name="umask" value="73" /> <!-- octal: 0111 -->
     </bean>
--->
 <!-- END Config for MongoDB GridFS file system -->
 
 </beans>

@@ -62,15 +62,18 @@ public class GridfsFileObject implements FileObject {
      * @param connection Connection to the GridFS connection object.
      */
     public GridfsFileObject(String path,
-            GridfsFileSystemConnectionImpl connection) {
+                            GridfsFileSystemConnectionImpl connection) {
         if (connection == null) {
             // Bail out if we don't have a working GridFS connection.
             return;
         }
         this._path = path;
+        if (this._path.endsWith(GridfsConstants.FILE_SEP)) {
+            this._path = path.substring(0, path.length() - 1);
+        }
         this._connection = connection;
         
-        DBObject query = new BasicDBObject("filename", path);
+        DBObject query = new BasicDBObject("filename", this._path);
         DBCursor results = this._connection.getFs().getFileList(query);
         if (results.count() > 0) {
             DBObject newest = results.sort(new BasicDBObject("uploadDate", -1)).limit(1).next();
@@ -80,10 +83,10 @@ public class GridfsFileObject implements FileObject {
         } else {
             // This entry might be a directory without a specific entry with
             // contentType == "collection". Let's check for that ...
-            String pathEscaped = path.replace(GridfsConstants.FILE_SEP,
-                                              "\\" + GridfsConstants.FILE_SEP);
+            String pathEscaped = this._path + GridfsConstants.FILE_SEP;
+            pathEscaped = pathEscaped.replace("/", "\\/");
             pathEscaped = pathEscaped.replace(".", "\\.");
-            Pattern searchPattern = Pattern.compile("^" + pathEscaped + "\\/");
+            Pattern searchPattern = Pattern.compile("^" + pathEscaped);
             query = new BasicDBObject("filename", searchPattern);
             List<GridFSDBFile> foundEntries = this._connection.getFs().find(query);
             
@@ -158,9 +161,45 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#getPermission()
      */
     public int getPermission() {
-        // TODO Auto-generated method stub
-        // See JargonFileObject, for now just read privilege.
-        return FtpConstants.PRIV_READ;
+        // We'll start out with default permissions, which are overridden
+        // if applicable.
+        int permission = this._connection.getConfig().getDefaultPermissions();
+        
+        if (this._exists) {
+            if (this.isFile()) {
+                // This is a file, and it's accessMode meta-data may exist.
+                Object permissionEntry = this._fileHandle.get("accessMode");
+                if (permissionEntry != null) {
+                    permission = (Integer)permissionEntry;
+                }
+            } else {
+                // It's a directory.
+                if (!this._implicitEntry) {
+                    // This is a dir, and it's accessMode meta-data may exist.
+                    Object permissionEntry = this._fileHandle.get("accessMode");
+                    if (permissionEntry != null) {
+                        permission = (Integer)permissionEntry;
+                    }
+                } else {
+                    // This is an "implicit" dir (does not exist in GridFS, as
+                    // a collection, but other entries are stored below it).
+                    // Let's move "up" until we find a dir entry with permissions,
+                    // and "inherit" them.
+                    if (!this._path.equals(GridfsConstants.FILE_SEP)
+                            && !this._path.isEmpty()) {
+                        permission = this.getParent().getPermission();
+                    }
+                }
+            }
+        } else {
+            // This is the case for a new file or directory. Use permissions
+            // of parent dir.
+            if (!this._path.equals(GridfsConstants.FILE_SEP)) {
+                permission = this.getParent().getPermission();
+            }
+        }
+        
+        return permission;
     }
 
     /**
@@ -253,7 +292,7 @@ public class GridfsFileObject implements FileObject {
      */
     public RandomAccessFileObject getRandomAccessFileObject(String mode)
             throws IOException {
-        return new GridfsRandomAccessFileObjectImpl(this, mode);
+        return new GridfsRandomAccessFileObjectImpl(this);
     }
 
     /**
@@ -276,7 +315,8 @@ public class GridfsFileObject implements FileObject {
      * @see au.org.arcs.griffin.filesystem.FileObject#getParent()
      */
     public FileObject getParent() {
-        if (this._path.equals(GridfsConstants.FILE_SEP)) {
+        if (this._path.equals(GridfsConstants.FILE_SEP)
+                || this._path.isEmpty()) {
             return new GridfsFileObject(GridfsConstants.FILE_SEP,
                                         this._connection);
         } else {
@@ -361,8 +401,15 @@ public class GridfsFileObject implements FileObject {
      */
     @Override
     public boolean create() {
-        // TODO Auto-generated method stub
-        return false;
+        if ((this.getParent().getPermission() & FtpConstants.PRIV_WRITE) > 0) {
+            this._fileHandle = this._connection.getFs().createFile();
+            this._fileHandle.put("accessMode", this._connection.getConfig().getDefaultPermissions());
+            this._fileHandle.put("owner", this._connection.getUser());
+            this._fileHandle.save();
+            return true; 
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -372,7 +419,10 @@ public class GridfsFileObject implements FileObject {
      */
     @Override
     public String getOwner() {
-        // TODO Auto-generated method stub
+        Object owner = this._fileHandle.get("owner");
+        if (owner != null) {
+            return (String)owner;
+        }
         return null;
     }
 
@@ -383,8 +433,7 @@ public class GridfsFileObject implements FileObject {
      */
     @Override
     public OutputStream getOutputStream() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return (new GridfsRandomAccessFileObjectImpl(this)).getNewFileOutputStream();
     }
 
     /**
@@ -394,7 +443,6 @@ public class GridfsFileObject implements FileObject {
      */
     @Override
     public InputStream getInpuStream(long offset) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return (new GridfsRandomAccessFileObjectImpl(this)).getReadInputStream();
     }
 }

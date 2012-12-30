@@ -45,6 +45,7 @@ import com.mongodb.gridfs.GridFS;
  * @author Guy K. Kloss
  */
 public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
+    private GridfsConfig _config = null;
     private Mongo _mongoInstance = null;
     private DB _db = null;
     private GridFS _fs = null;
@@ -55,102 +56,45 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
     /**
      * Constructor.
      * 
-     * @param serverName
-     *            Host (name) of MongoDB server.
-     * @param serverPort
-     *            Port number of MongoDB server.
-     * @param serverType
-     *            Configured type of server.
-     * @param dbName
-     *            Database name on MongoDB server that hosts the GridFS.
-     * @param bucketName
-     *            DB's "bucket" (collection) used for storing the files.
-     * @param user
-     *            User name for authenticated access to database (empty string
-     *            for unauthenticated access).
-     * @param password
-     *            Password for authentication.
-     * @param credential
-     *            Generic credential of connection.
+     * @param config Configuration container.
+     * @param credential Generic credential of connection.
      * @throws IOException
      *             In case the connection cannot be established.
      */
-    public GridfsFileSystemConnectionImpl(String serverName,
-            int serverPort,
-            String serverType,
-            String dbName,
-            String bucketName,
-            String user,
-            char[] password,
-            GSSCredential credential) throws IOException {
-        
-        if (!serverType.equalsIgnoreCase(GridfsConstants.SERVER_TYPE)) {
+    public GridfsFileSystemConnectionImpl(GridfsConfig config,
+                                          GSSCredential credential) throws IOException {
+        if (!config.getServerType().equalsIgnoreCase(GridfsConstants.SERVER_TYPE)) {
             // Bail out if we're wrong here.
             return;
         }
         
-        // Set defaults if values not present:
-        if (serverPort == 0) {
-            serverPort = GridfsConstants.DEFAULT_SERVER_PORT;
-        }
-        if (serverName == null) {
-            serverName = GridfsConstants.DEFAULT_SERVER_HOST;
-        }
-        if (bucketName == null) {
-            bucketName = GridfsConstants.BUCKET_NAME;
-        }
-        
+        this._config = config;
         this._credential = credential;
         
         try {
-            log.debug("MongoDB/GridFS server: " + serverName
-                      + ", port: " + serverPort
-                      + ", DB name: " + dbName);
-            this._mongoInstance = new Mongo(serverName, serverPort);
-            this._db = this._mongoInstance.getDB(dbName);
+            log.debug("MongoDB/GridFS server: " + config.getServerName()
+                      + ", port: " + config.getServerPort()
+                      + ", DB name: " + config.getDbName());
+            this._mongoInstance = new Mongo(config.getServerName(),
+                                            config.getServerPort());
+            this._db = this._mongoInstance.getDB(config.getDbName());
             log.debug("Got connection to MongoDB.");
-            if (user != null && !user.isEmpty()) {
-                this._db.authenticate(user, password);
+            if (config.getUser() != null && !config.getUser().isEmpty()) {
+                this._db.authenticate(config.getUser(), config.getPassword());
                 log.debug("Authenticated at MongoDB with user \""
-                          + user + "\".");
+                          + config.getUser() + "\".");
             }
-            this._fs = new GridFS(this._db, bucketName);
+            this._fs = new GridFS(this._db, config.getBucketName());
             log.debug("Established connection to GridFS.");
         } catch (UnknownHostException e) {
             log.error("Could not connect to storage host DB '"
-                      + serverName + "': " + e.getMessage());
+                      + config.getServerName() + "': " + e.getMessage(), e);
             throw new IOException(e.getMessage());
         } catch (MongoException e) {
             log.error("Could not connect to MongoDB database: "
-                      + e.getMessage());
+                      + e.getMessage(), e);
             throw new IOException(e.getMessage());
         }
-    }
-    
-    /**
-     * Simplified constructor without authentication.
-     * 
-     * @param serverName
-     *            Host (name) of MongoDB server.
-     * @param serverPort
-     *            Port number of MongoDB server.
-     * @param dbName
-     *            Database name on MongoDB server that hosts the GridFS.
-     * @param bucket
-     *            DB's "bucket" (collection) used for storing the files.
-     * @param credential
-     *            Generic credential of connection.
-     * @throws IOException
-     *             In case the connection cannot be established.
-     */
-    public GridfsFileSystemConnectionImpl(String serverName,
-            int serverPort,
-            String serverType,
-            String dbName,
-            String bucket,
-            GSSCredential credential) throws IOException {
-        this(serverName, serverPort, serverType, dbName, bucket, "", null,
-             credential);
     }
     
     /**
@@ -229,5 +173,13 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
      */
     public GridFS getFs() {
         return this._fs;
+    }
+    
+    /**
+     * Configuration for this MongoDB/GridFS storage backend.
+     * @return Returns the configuration container.
+     */
+    public GridfsConfig getConfig() {
+        return _config;
     }
 }

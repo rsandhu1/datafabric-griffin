@@ -33,19 +33,15 @@ import au.org.arcs.griffin.filesystem.FileSystemConnection;
  * Implementation of the {@link au.org.arcs.griffin.filesystem.FileSystem) 
  * interface linking up general file system related stuff.
  * 
+ * This class is also a bean container, so it provides getters and setters for
+ * all the configuration options in the griffin-ctx.xml configuration file.
+ * 
  * @version $Revision: 1.1 $
  * @author Guy K. Kloss
  */
 public class GridfsFileSystemImpl implements FileSystem {
 
-    private String _serverName = null;
-    private int _serverPort = GridfsConstants.DEFAULT_SERVER_PORT;
-    private String _serverType = GridfsConstants.SERVER_TYPE;
-    private String _dbName = null;
-    private String _bucketName = GridfsConstants.BUCKET_NAME;
-    private String _user = null;
-    private char[] _password = null;
-    
+    private GridfsConfig _config = new GridfsConfig();
     private static Log log = LogFactory.getLog(GridfsFileObject.class);
     
 
@@ -79,22 +75,15 @@ public class GridfsFileSystemImpl implements FileSystem {
             GSSCredential credential) throws FtpConfigException, IOException {
         try {
             log.debug("Connected with DN = " + credential.getName().toString());
-            return new GridfsFileSystemConnectionImpl(this._serverName,
-                                                      this._serverPort,
-                                                      this._serverType,
-                                                      this._dbName,
-                                                      this._bucketName,
-                                                      this._user,
-                                                      this._password,
-                                                      credential);
+            return new GridfsFileSystemConnectionImpl(this._config, credential);
         } catch (NullPointerException e) {
             log.error("Could not connect to MongoDB: '"
-                      + e.getStackTrace().toString());
+                      + e.toString(), e);
             throw new FtpConfigException("Problem with GridFS storage backend configuration: "
                                          + e.getMessage());
         } catch (GSSException e) {
             log.error("Problem with access credentials: '"
-                      + e.getMessage());
+                      + e.getMessage(), e);
             throw new FtpConfigException("Problem with access credentials: "
                                          + e.getMessage());
         }
@@ -136,13 +125,12 @@ public class GridfsFileSystemImpl implements FileSystem {
         // documentation. Easy as ... :-)
     }
 
- 
-    /**
+     /**
      * Gets server name for connect.
      * @return Returns the serverName.
      */
     public String getServerName() {
-        return _serverName;
+        return this._config.getServerName();
     }
     
     /**
@@ -150,7 +138,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param serverName The serverName to set.
      */
     public void setServerName(String serverName) {
-        this._serverName = serverName;
+        this._config.setServerName(serverName);
     }
 
     /**
@@ -158,7 +146,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the serverPort.
      */
     public int getServerPort() {
-        return _serverPort;
+        return this._config.getServerPort();
     }
 
     /**
@@ -166,7 +154,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param serverPort The serverPort to set.
      */
     public void setServerPort(int serverPort) {
-        this._serverPort = serverPort;
+        this._config.setServerPort(serverPort);
     }
     
     /**
@@ -174,7 +162,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the serverType.
      */
     public String getServerType() {
-        return _serverType;
+        return this._config.getServerType();
     }
 
     /**
@@ -182,7 +170,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param serverType The serverType to set.
      */
     public void setServerType(String serverType) {
-        this._serverType = serverType;
+        this._config.setServerType(serverType);
     }
 
     /**
@@ -190,7 +178,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the dbName.
      */
     public String getDbName() {
-        return _dbName;
+        return this._config.getDbName();
     }
 
     /**
@@ -198,7 +186,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param dbName The dbName to set.
      */
     public void setDbName(String dbName) {
-        this._dbName = dbName;
+        this._config.setDbName(dbName);
     }
 
     /**
@@ -206,7 +194,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the bucket name.
      */
     public String getBucketName() {
-        return _bucketName;
+        return this._config.getBucketName();
     }
 
     /**
@@ -214,7 +202,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param bucketName The bucket name to set.
      */
     public void setBucketName(String bucketName) {
-        this._bucketName = bucketName;
+        this._config.setBucketName(bucketName);
     }
 
     /**
@@ -222,7 +210,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the user.
      */
     public String getUser() {
-        return _user;
+        return this._config.getUser();
     }
 
     /**
@@ -230,7 +218,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param user The user to set.
      */
     public void setUser(String user) {
-        this._user = user;
+        this._config.setUser(user);
     }
 
     /**
@@ -238,7 +226,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @return Returns the password.
      */
     public char[] getPassword() {
-        return _password;
+        return this._config.getPassword();
     }
 
     /**
@@ -246,6 +234,38 @@ public class GridfsFileSystemImpl implements FileSystem {
      * @param password The password to set.
      */
     public void setPassword(char[] password) {
-        this._password = password;
+        this._config.setPassword(password);
+    }
+
+    /**
+     * Permission settings (UN*X style permissions as octal integer).
+     * @return Returns default permission settings.
+     */
+    public int getDefaultPermissions() {
+        return this._config.getDefaultPermissions();
+    }
+    
+    /**
+     * Permission settings (UN*X style permissions as octal integer).
+     * @param defaultPermissions Default permissions to set.
+     */
+    public void setDefaultPermissions(int defaultPermissions) {
+        this._config.setDefaultPermissions(defaultPermissions);
+    }
+    
+    /**
+     * File mode creation mask (UN*X style as octal integer).
+     * @return Returns file creation umask.
+     */
+    public int getUmask() {
+        return this._config.getUmask();
+    }
+
+    /**
+     * File mode creation mask (UN*X style as octal integer).
+     * @param defaultUmask The file creation umask to set.
+     */
+    public void setUmask(int umask) {
+        this._config.setUmask(umask);
     }
 }

@@ -25,9 +25,14 @@ package au.org.arcs.griffin.filesystem.impl.gridfs;
  * @author Guy K. Kloss
  */
 public class GridfsConstants {
+    public static final String SERVER_NAME = "localhost";
     public static final String FILE_SEP = "/";
     public static final String DEFAULT_SERVER_HOST = "localhost";
     public static final int DEFAULT_SERVER_PORT = 27017;
     public static final String SERVER_TYPE = "gridfs";
     public static final String BUCKET_NAME = "fs";
+    public static final int DEFAULT_PERMISSIONS = 0644;
+    public static final int DEFAULT_UMASK = 0111;
+    public static final int PRIVILEGE_MASK = 0777;
+    public static final int PRIVILEGE_MAX = 0666;
 }

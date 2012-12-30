@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import au.org.arcs.griffin.filesystem.RandomAccessFileObject;
 
 import com.mongodb.gridfs.GridFSDBFile;
@@ -41,25 +44,20 @@ import com.mongodb.gridfs.GridFSInputFile;
 public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject {
 
     private GridfsFileObject _fileHandle = null;
-    private String _accessMode = null;
     private OutputStream _newFileOutStream = null;
     private GridFSInputFile _newOutputFile = null;
     private InputStream _readInputStream = null;
+
+    private static Log log = LogFactory.getLog(GridfsRandomAccessFileObjectImpl.class);
 
     /**
      * Constructor.
      * 
      * @param fileHandle
      *            GridFS file handle.
-     * @param mode
-     *            File access mode, @see java.io.RandomAccessFile. Mostly 
-     *            "r" and "rw" should be supported.
-     *            
      */
-    public GridfsRandomAccessFileObjectImpl(GridfsFileObject fileHandle,
-            String mode) {
+    public GridfsRandomAccessFileObjectImpl(GridfsFileObject fileHandle) {
         this._fileHandle = fileHandle;
-        this._accessMode = mode;
     }
 
     /**
@@ -68,25 +66,12 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#seek(long)
      */
     public void seek(long offset) throws IOException {
-        // First some sanity checks.
+        // First a sanity check.
         if (this._newFileOutStream != null) {
             throw new IOException("Cannot seek in file open for writing.");
         }
-        if (this._fileHandle.getFileHandle().getLength() < offset) {
-            throw new IOException("Cannot seek to position " + offset
-                                  + ", file too short.");
-        }
-        
-        byte[] dummyBytes = new byte[(int) this._fileHandle.getFileHandle()
-                                                           .getChunkSize()];
-        long bytesRead = 0;
-        int length = dummyBytes.length;
-        while (bytesRead < offset) {
-            if (offset - bytesRead < length) {
-                length = (int) (offset - bytesRead);
-            }
-            bytesRead += this.read(dummyBytes, 0, length);
-        }
+
+        this.getReadInputStream().skip(offset);
     }
 
     /**
@@ -95,7 +80,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read()
      */
     public int read() throws IOException {
-        return _getReadInputStream().read();
+        return getReadInputStream().read();
     }
 
     /**
@@ -104,7 +89,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read(byte[])
      */
     public int read(byte[] b) throws IOException {
-        return _getReadInputStream().read(b);
+        return getReadInputStream().read(b);
     }
 
     /**
@@ -113,7 +98,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#read(byte[], int, int)
      */
     public int read(byte[] b, int off, int len) throws IOException {
-        return _getReadInputStream().read(b, off, len);
+        return getReadInputStream().read(b, off, len);
     }
 
     /**
@@ -122,12 +107,16 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#close()
      */
     public void close() throws IOException {
-        InputStream my_is = ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream();
-        if (this._newOutputFile != null) {
-            this._newFileOutStream.flush();
+        if (this._newFileOutStream != null) {
+            // We're writing ...
+            this._newFileOutStream.close();
             this._newOutputFile.save();
+            log.debug("Wrote file with ID " + this._newOutputFile.getId()
+                      + " to MongoDB/GridFS.");
+        } else if (this._readInputStream != null) {
+            // We've got a file open for reading.
+            this._readInputStream.close();
         }
-        my_is.close();
     }
 
     /**
@@ -147,7 +136,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#write(int)
      */
     public void write(int b) throws IOException {
-        this._getNewFileOutputStream().write(b);
+        this.getNewFileOutputStream().write(b);
     }
 
     /**
@@ -156,7 +145,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * @see au.org.arcs.griffin.filesystem.RandomAccessFileObject#write(byte[])
      */
     public void write(byte[] b) throws IOException {
-        this._getNewFileOutputStream().write(b);
+        this.getNewFileOutputStream().write(b);
     }
 
     /**
@@ -166,7 +155,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      *      int, int)
      */
     public void write(byte[] b, int off, int len) throws IOException {
-        this._getNewFileOutputStream().write(b, off, len);
+        this.getNewFileOutputStream().write(b, off, len);
     }
 
     /**
@@ -189,11 +178,13 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * 
      * @return a handle to the stream.
      */
-    private OutputStream _getNewFileOutputStream() {
+    public OutputStream getNewFileOutputStream() {
         if (this._newFileOutStream == null) {
             this._newOutputFile = this._fileHandle.getConnection()
                                                   .getFs()
-                                                  .createFile(this._fileHandle.getName());
+                                                  .createFile(this._fileHandle.getPath());
+            this._newOutputFile.put("owner", this._fileHandle.getConnection().getUser());
+            this._newOutputFile.put("accessMode", this._fileHandle.getPermission());
             this._newFileOutStream = this._newOutputFile.getOutputStream();
         }
         return this._newFileOutStream;
@@ -204,11 +195,10 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * 
      * @return a handle to the stream.
      */
-    private InputStream _getReadInputStream() {
-        if (_readInputStream == null) {
-            _readInputStream = ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream();
+    public InputStream getReadInputStream() {
+        if (this._readInputStream == null) {
+            this._readInputStream = ((GridFSDBFile) this._fileHandle.getFileHandle()).getInputStream();
         }
         return _readInputStream;
     }
-    
 }
