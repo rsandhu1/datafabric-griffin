@@ -64,8 +64,7 @@ public abstract class AbstractFtpCmdStorFile extends AbstractFtpCmdStor {
             log.debug("file: " + file.getCanonicalPath()
                       + "; parent perm: " + file.getParent().getPermission());
         } catch (IOException e1) {
-            log.error("Problem accessing file attributes: " + e1.getMessage());
-            e1.printStackTrace();
+            log.error("Problem accessing file attributes: " + e1.getMessage(), e1);
         }
         if ((file.getParent().getPermission() & PRIV_WRITE) == 0) {
             throw new FtpPermissionException("No write permission");
