@@ -40,7 +40,7 @@ public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject 
      * 
      * @param file Jargon remote file instance.
      * @param mode File access mode, @see java.io.RandomAccessFile. Mostly 
-     *          "r" and "rw" should be suppported. 
+     *          "r" and "rw" should be supported. 
      * @throws IOException If file access fails or privileges are insufficient.
      */
     public JargonRandomAccessFileObjectImpl(JargonFileSystemConnectionImpl connection, IRODSFile file, String mode)
