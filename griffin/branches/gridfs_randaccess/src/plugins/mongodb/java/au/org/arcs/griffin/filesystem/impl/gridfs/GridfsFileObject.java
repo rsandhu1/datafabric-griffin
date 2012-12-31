@@ -156,11 +156,12 @@ public class GridfsFileObject implements FileObject {
     }
 
     /**
-     * {@inheritDoc}
+     * Full UNIX like permissions as integer, also containing group and "all"
+     * permissions.
      *
      * @see au.org.arcs.griffin.filesystem.FileObject#getPermission()
      */
-    public int getPermission() {
+    public int getUnixPermission() {
         // We'll start out with default permissions, which are overridden
         // if applicable.
         int permission = this._connection.getConfig().getDefaultPermissions();
@@ -187,7 +188,7 @@ public class GridfsFileObject implements FileObject {
                     // and "inherit" them.
                     if (!this._path.equals(GridfsConstants.FILE_SEP)
                             && !this._path.isEmpty()) {
-                        permission = this.getParent().getPermission();
+                        permission = ((GridfsFileObject)this.getParent()).getUnixPermission();
                     }
                 }
             }
@@ -195,10 +196,37 @@ public class GridfsFileObject implements FileObject {
             // This is the case for a new file or directory. Use permissions
             // of parent dir.
             if (!this._path.equals(GridfsConstants.FILE_SEP)) {
-                permission = this.getParent().getPermission();
+                permission = ((GridfsFileObject)this.getParent()).getUnixPermission();
             }
         }
         
+        return permission;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see au.org.arcs.griffin.filesystem.FileObject#getPermission()
+     */
+    public int getPermission() {
+        int permission = FtpConstants.PRIV_NONE;
+        int unixPermission = this.getUnixPermission();
+        String currentUser = this._connection.getUser();
+        String owner = this.getOwner();
+        if (currentUser.equals(owner)) {
+            // Shift UNIX permissions by 6 bit to bring owner bits into low
+            // positions. Otherwise use the "all" bits in that position
+            // directly.
+            unixPermission >>>= 6;
+        }
+        // Use the bottom three bits only for the permissions,
+        // but only r/w bits are used.
+        if ((unixPermission & 04) > 0) {
+            permission |= FtpConstants.PRIV_READ;
+        }
+        if ((unixPermission & 02) > 0) {
+            permission |= FtpConstants.PRIV_WRITE;
+        }
         return permission;
     }
 
@@ -419,11 +447,35 @@ public class GridfsFileObject implements FileObject {
      */
     @Override
     public String getOwner() {
-        Object owner = this._fileHandle.get("owner");
-        if (owner != null) {
-            return (String)owner;
+        String owner = null;
+        if (this._exists) {
+            if (this.isFile()) {
+                // This is a file, and it's accessMode meta-data may exist.
+                owner = (String)this._fileHandle.get("owner");
+            } else {
+                // It's a directory.
+                if (!this._implicitEntry) {
+                    // This is a dir, and it's owner meta-data may exist.
+                    owner = (String)this._fileHandle.get("owner");
+                } else {
+                    // This is an "implicit" dir (does not exist in GridFS, as
+                    // a collection, but other entries are stored below it).
+                    // Let's move "up" until we find a dir entry with an owner,
+                    // and "inherit" it.
+                    if (!this._path.equals(GridfsConstants.FILE_SEP)
+                            && !this._path.isEmpty()) {
+                        owner = this.getParent().getOwner();
+                    }
+                }
+            }
+        } else {
+            // This is the case for a new file or directory. Use current user.
+            if (!this._path.equals(GridfsConstants.FILE_SEP)) {
+                owner = this._connection.getUser();
+            }
         }
-        return null;
+        
+        return owner;
     }
 
     /**
