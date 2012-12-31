@@ -49,7 +49,8 @@ public interface FileObject {
     public boolean isDirectory();
 
     /**
-     * Permissions as UNIX file system like integer.
+     * Permissions defining read/write access for the currently authenticated
+     * user.
      * 
      * @return Permissions.
      */
