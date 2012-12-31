@@ -13,5 +13,10 @@ Configuration of some parameters for the tests.
 ## http://www.arcs.org.au/
 ## http://www.aut.ac.nz/
 
+from acceptance_testing import execute
 TESTS_DIR = 'tests'
-REPLACEMENTS = {'host': 'arcs-df.vpac.org', 'port': '2810'}
+
+# The "execute()" statement tries to determine reliably the FQDN of this machine.
+# Alternatively, it can also be set fully manually.
+REPLACEMENTS = {'host': execute('host -TtA $(hostname -s)', replacements=False).split()[0],
+                'port': '2810'}

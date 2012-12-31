@@ -25,7 +25,7 @@ import doctest
 import unittest
 import test_config
 
-def execute(command):
+def execute(command, replacements=True):
     """
     Executes the command given in a shell, and returns all output from
     STDIN and STDERR as a string.
@@ -33,7 +33,10 @@ def execute(command):
     @param command: Command to execute (incl. calling parameters).
     @type command: C{string}
     """
-    prepared_command = command % test_config.REPLACEMENTS
+    prepared_command = command
+    if replacements:
+        prepared_command = command % test_config.REPLACEMENTS
+        
     try:
         return _execute_subprocess(prepared_command)
     except ImportError:
