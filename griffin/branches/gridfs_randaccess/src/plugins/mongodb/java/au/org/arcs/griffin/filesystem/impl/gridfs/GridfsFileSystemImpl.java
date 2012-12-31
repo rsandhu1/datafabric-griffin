@@ -50,6 +50,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      *
      * @see au.org.arcs.griffin.filesystem.FileSystem#getSeparator()
      */
+    @Override
     public String getSeparator() {
         return GridfsConstants.FILE_SEP;
     }
@@ -59,6 +60,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      *
      * @see au.org.arcs.griffin.filesystem.FileSystem#init()
      */
+    @Override
     public void init() throws IOException {
         // We'll have every GridfsFileSystemConnection establish its own
         // DB connection. Maybe this is not a good idea, maybe it is. That's
@@ -71,6 +73,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      *
      * @see au.org.arcs.griffin.filesystem.FileSystem#createFileSystemConnection(org.ietf.jgss.GSSCredential)
      */
+    @Override
     public FileSystemConnection createFileSystemConnection(
             GSSCredential credential) throws FtpConfigException, IOException {
         try {
@@ -98,8 +101,15 @@ public class GridfsFileSystemImpl implements FileSystem {
     public FileSystemConnection createFileSystemConnection(
             String username, String password)
             throws FtpConfigException, IOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            log.debug("Connected with DN = " + username);
+            return new GridfsFileSystemConnectionImpl(this._config, username);
+        } catch (NullPointerException e) {
+            log.error("Could not connect to MongoDB: '"
+                      + e.toString(), e);
+            throw new FtpConfigException("Problem with GridFS storage backend configuration: "
+                                         + e.getMessage());
+        }
     }
 
     /**
@@ -111,8 +121,15 @@ public class GridfsFileSystemImpl implements FileSystem {
     public FileSystemConnection createFileSystemConnectionWithPublicKey(
             String username, String sshKeyType, String base64KeyString)
             throws FtpConfigException, IOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            log.debug("Connected with DN = " + username);
+            return new GridfsFileSystemConnectionImpl(this._config, username);
+        } catch (NullPointerException e) {
+            log.error("Could not connect to MongoDB: '"
+                      + e.toString(), e);
+            throw new FtpConfigException("Problem with GridFS storage backend configuration: "
+                                         + e.getMessage());
+        }
     }
 
     /**
@@ -120,6 +137,7 @@ public class GridfsFileSystemImpl implements FileSystem {
      *
      * @see au.org.arcs.griffin.filesystem.FileSystem#exit()
      */
+    @Override
     public void exit() {
         // We don't need to close any connections according to the MongoDB
         // documentation. Easy as ... :-)

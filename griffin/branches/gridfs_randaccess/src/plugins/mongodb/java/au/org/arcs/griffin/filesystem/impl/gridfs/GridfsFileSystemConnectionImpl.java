@@ -50,16 +50,16 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
     private DB _db = null;
     private GridFS _fs = null;
     private GSSCredential _credential = null;
+    private String _username;
 
     private static Log log = LogFactory.getLog(GridfsFileObject.class);
 
     /**
-     * Constructor.
+     * Constructor using GSS authentication credentials.
      * 
      * @param config Configuration container.
      * @param credential Generic credential of connection.
-     * @throws IOException
-     *             In case the connection cannot be established.
+     * @throws IOException In case the connection cannot be established.
      */
     public GridfsFileSystemConnectionImpl(GridfsConfig config,
                                           GSSCredential credential) throws IOException {
@@ -68,9 +68,33 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
             return;
         }
         
-        this._config = config;
         this._credential = credential;
-        
+        this._connect(config);
+    }
+    
+    /**
+     * Constructor using username/password or username/public key combination, 
+     * @see au.org.arcs.griffin.filesystem.FileSystem#createFileSystemConnection(java.lang.String, java.lang.String) or
+     * @see au.org.arcs.griffin.filesystem.FileSystem#createFileSystemConnectionWithPublicKey(java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @param config Configuration container.
+     * @param username User name.
+     * @throws IOException In case the connection cannot be established.
+     */
+    public GridfsFileSystemConnectionImpl(GridfsConfig config,
+                                          String username) throws IOException {
+        this._username = username;
+        this._connect(config);
+    }
+
+    /**
+     * Connects to the MongoDB/GridFS server.
+     * 
+     * @param config Configuration container.
+     * @throws IOException In case the connection cannot be established.
+     */
+    private void _connect(GridfsConfig config) throws IOException {
+        this._config = config;
         try {
             log.debug("MongoDB/GridFS server: " + config.getServerName()
                       + ", port: " + config.getServerPort()
@@ -123,9 +147,13 @@ public class GridfsFileSystemConnectionImpl implements FileSystemConnection {
      */
     public String getUser() {
         try {
-            return this._credential.getName().toString();
+            if (this._credential != null) {
+                return this._credential.getName().toString();
+            } else {
+                return this._username;
+            }
         } catch (GSSException e1) {
-            log.error(e1.getStackTrace());
+            log.error(e1.getStackTrace(), e1);
             return null;
         }
     }
