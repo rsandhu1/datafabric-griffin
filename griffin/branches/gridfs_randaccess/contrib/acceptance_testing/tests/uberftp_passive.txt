@@ -9,8 +9,8 @@ Make sure that the configuration in test_config.py is set appropriately!
 
 The following line is some bootstrapping. It must be kept here.
 
-    >>> from acceptance_testing import execute
-    >>> import tempfile
+#    >>> from acceptance_testing import execute
+#    >>> import tempfile
 
 
 Testing commands and simple operations
@@ -19,8 +19,8 @@ Testing commands and simple operations
 local file system "ls -l"
 -------------------------
 
-    >>> results = execute('ls -l')
-    >>> print results
+#    >>> results = execute('ls -l')
+#    >>> print results
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
     total ...
@@ -30,16 +30,16 @@ local file system "ls -l"
     -rw-r--r-- ... test_config.py
     ...
     drwxr-xr-x ... tests
-    >>> 'test_config.py' in results
+#    >>> 'test_config.py' in results
     True
-    >>> 'foo_bar_baz.txt' not in results
+#    >>> 'foo_bar_baz.txt' not in results
     True
     
 
 local file system "pwd"
 -----------------------
 
-    >>> print execute('pwd')
+#    >>> print execute('pwd')
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
     /.../acceptance_testing
@@ -48,7 +48,7 @@ local file system "pwd"
 uberftp "pwd"
 -------------
 
-    >>> print execute('uberftp -passive %(host)s "pwd"')
+#    >>> print execute('uberftp -passive %(host)s "pwd"')
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
     220 ... GridFTP Server (Griffin, Java, ...) Ready.
@@ -59,7 +59,7 @@ uberftp "pwd"
 uberftp "ls"
 ------------
 
-    >>> print execute('uberftp -passive %(host)s "ls"')
+#    >>> print execute('uberftp -passive %(host)s "ls"')
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
     220 ... GridFTP Server (Griffin, Java, ...) Ready.

@@ -260,7 +260,7 @@ public class GridfsFileObject implements FileObject {
         List<GridFSDBFile> foundEntries = this._connection.getFs().find(query);
         
         if (foundEntries.isEmpty()) {
-            return null;
+            return new FileObject[0];
         }
 
         // "Uniquify" entries (only one entry per path), and no deeper than

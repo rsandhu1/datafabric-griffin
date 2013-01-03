@@ -32,6 +32,9 @@ def execute(command, replacements=True):
 
     @param command: Command to execute (incl. calling parameters).
     @type command: C{string}
+    @param replacements: Whether to perform automatic field replacements
+        in the command (default: True).
+    @type replacements: C{bool)
     """
     prepared_command = command
     if replacements:

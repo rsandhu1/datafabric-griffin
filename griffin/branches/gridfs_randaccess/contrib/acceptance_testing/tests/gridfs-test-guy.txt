@@ -3,7 +3,9 @@ Testing for MongoDB/GridFS
 ==========================
 
 The tests in this file exercise the GridFTP server using the globus-url-copy
-and UberFTP clients.
+client for GridFTP transactions against the local machine.  Some entries are
+checked against the locally running MongoDB/GridFS using the mongofiles
+command line tool.
 
 Make sure that the configuration in test_config.py is set appropriately!
 
@@ -12,84 +14,144 @@ The following line is some bootstrapping. It must be kept here.
     >>> from acceptance_testing import execute
     >>> import os
     >>> import tempfile
+    >>> LOCAL_FILE = os.path.join(os.getcwd(), 'test_config.py')
 
 
 Testing commands and simple operations
 ======================================
 
-uberftp ls /test
-----------------
+list entries under /test/
+-------------------------
 
 Checks the listing of the sub directory "/test"
 
-    >>> result = execute('uberftp -passive %(host)s "ls /test"')
+    >>> result = execute('globus-url-copy -list gsiftp://%(host)s/test/')
     >>> print result
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
-    220 ... GridFTP Server (Griffin, Java, ...) Ready.
-    230 User /C=.../CN=... logged in.
-    total ...
+    gsiftp://.../test/
+    ...
     >>> 'test_config.py' in result
     True
 
 
-globus-url-copy get /test/test_config.py
-----------------------------------------
+list empty directory
+--------------------
 
-Copies the file /test/test_config.py to the local host. The local file is
-verified and removed again.
+Checks the listing of the sub directory "/playground"
 
-    >>> dummy, filename = tempfile.mkstemp()
-    >>> command = 'globus-url-copy gsiftp://%(host)s/test/test_config.py file://' + filename
-    >>> dummy = execute(command)
-    >>> print open(filename).read()
+    >>> result = execute('globus-url-copy -list gsiftp://%(host)s/playground/')
+    >>> print result
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
-    # -*- coding: utf-8 -*-
-    """
-    Configuration of some parameters for the tests.
-    """
+    gsiftp://.../playground/
     <BLANKLINE>
-    ## Created: 2010-12-15 Guy K. Kloss <Guy.Kloss@aut.ac.nz>
-    ##
-    ## Copyright 2010 Australian Research Collaboration Service
-    ##                and Auckland University of Technology, New Zealand
-    ##
-    ## Some rights reserved.
-    ##
-    ## http://www.arcs.org.au/
-    ## http://www.aut.ac.nz/
-    <BLANKLINE>
-    TESTS_DIR = 'tests'
-    REPLACEMENTS = {'host': '...'}
     <BLANKLINE>
 
 
-globus-url-copy put /test/bar.py
---------------------------------
+upload a file
+-------------
 
-Copies the (previously retrieved) file back to the remote host as "/test/bar.py",
-and checks afterwards if it's there.
+Copies the local file test_config.py to /spam/test_config.py on the
+server.
 
-    >>> command = 'globus-url-copy file://' + filename + ' gsiftp://%(host)s/test/bar.py'
-    >>> dummy = execute(command)
-    >>> result = execute('uberftp -passive %(host)s "ls /test"')
-    >>> 'bar.py' in result
+    >>> result = execute('globus-url-copy file://' + LOCAL_FILE 
+    ...                  + ' gsiftp://%(host)s/spam/test_config.py')
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    >>> result = execute('mongofiles list')
+    >>> '/spam/test_config.py' in result
+    True
+
+
+upload a file (yet again)
+-------------------------
+
+Uploads a file again.
+
+    >>> result = execute('globus-url-copy file://' + LOCAL_FILE 
+    ...                  + ' gsiftp://%(host)s/spam/test_config.py')
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    >>> result = execute('mongofiles list')
+    >>> '/spam/test_config.py' in result
+    True
+    
+    
+retrieve a file
+---------------
+
+Retrieves the previously uploaded file /spam/test_config.py to the
+local host. The local file is verified and removed again.
+
+    >>> dummy, filename = tempfile.mkstemp()
+    >>> result = execute('globus-url-copy gsiftp://%(host)s/spam/test_config.py '
+    ...                  + 'file://' + filename)
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    >>> open(filename).read() == open(LOCAL_FILE).read()
+    True
+    >>> # Delete file again.
+    >>> result = execute('mongofiles delete /spam/test_config.py')
+    >>> 'done!' in result
     True
     >>> os.remove(filename)
 
 
-uberftp rm /test/bar.py
------------------------
+failing retrieval of non-existent file
+--------------------------------------
 
-Removes the remote file "/test/bar.py" again and checks the directory content.
+Tries to retrieve a non-existing file /spam/foo.py to the local host.
 
-    >>> print execute('uberftp -passive %(host)s "rm /test/bar.py"')
+    >>> dummy, filename = tempfile.mkstemp()
+    >>> result = execute('globus-url-copy gsiftp://%(host)s/spam/foo.py '
+    ...                  + 'file://' + filename)
+    >>> print result
     ...     # doctest: +ELLIPSIS
     ...     # doctest: +NORMALIZE_WHITESPACE
-    220 ... GridFTP Server (Griffin, Java, ...) Ready.
-    230 User /C=.../CN=... logged in.
     <BLANKLINE>
-    >>> result = execute('uberftp -passive ngdata.massey.ac.nz "ls /test"')
-    >>> 'bar.py' not in result
+    error: globus_ftp_client: the server responded with an error
+    550 Requested action not taken. Path unavailable (e.g., path not found, no access).
+    <BLANKLINE>
+    <BLANKLINE>
+    >>> os.remove(filename)
+
+
+try to upload to a read-only place
+----------------------------------
+
+Tries to upload a file to a place without write privileges.
+
+    >>> result = execute('globus-url-copy file://' + LOCAL_FILE 
+    ...                  + ' gsiftp://%(host)s/readonly/test_config.py')
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    ...
+    550 Requested action not taken. No write permission.
+    <BLANKLINE>
+    <BLANKLINE>
+
+
+retrieve a read-only file
+-------------------------
+
+Retrieves the read-only file.
+
+    >>> dummy, filename = tempfile.mkstemp()
+    >>> result = execute('globus-url-copy gsiftp://%(host)s/readonly/no_paint.txt '
+    ...                  + 'file://' + filename)
+    >>> print result
+    ...     # doctest: +ELLIPSIS
+    ...     # doctest: +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    >>> '#!/usr/bin/env python' in open(filename).read()
     True
+    >>> os.remove(filename)

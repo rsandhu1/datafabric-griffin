@@ -184,7 +184,7 @@ public class GridfsRandomAccessFileObjectImpl implements RandomAccessFileObject 
                                                   .getFs()
                                                   .createFile(this._fileHandle.getPath());
             this._newOutputFile.put("owner", this._fileHandle.getConnection().getUser());
-            this._newOutputFile.put("accessMode", this._fileHandle.getPermission());
+            this._newOutputFile.put("accessMode", this._fileHandle.getUnixPermission());
             this._newFileOutStream = this._newOutputFile.getOutputStream();
         }
         return this._newFileOutStream;
