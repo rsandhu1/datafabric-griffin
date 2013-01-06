@@ -1,7 +1,7 @@
 package au.org.arcs.griffin.utils;
 
-import java.io.ByteArrayOutputStream; 
-import java.io.IOException; 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
  

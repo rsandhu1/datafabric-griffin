@@ -24,11 +24,13 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import au.org.arcs.griffin.cmd.AbstractFtpCmd;
 import au.org.arcs.griffin.exception.FtpCmdException;
@@ -57,6 +59,8 @@ import au.org.arcs.griffin.utils.IOUtils;
  */
 public class FtpCmdStat extends AbstractFtpCmd {
 
+    private static Log log = LogFactory.getLog(FtpCmdStat.class);
+    
     /**
      * {@inheritDoc}
      */
@@ -85,8 +89,7 @@ public class FtpCmdStat extends AbstractFtpCmd {
 	                    doPrintFileInfo(files[i], null);
 	                }
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e, e);
 					msgOut(MSG500_ERROR, new String[]{e.getMessage()});
 	                return;
 				}

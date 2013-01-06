@@ -39,7 +39,6 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
-
 import org.apache.commons.codec.binary.Base64;
 
 import au.org.arcs.griffin.exception.FtpConfigException;

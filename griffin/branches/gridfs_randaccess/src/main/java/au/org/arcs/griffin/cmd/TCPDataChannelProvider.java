@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.globus.ftp.DataChannelAuthentication;
 import org.globus.ftp.GridFTPSession;
 import org.globus.ftp.extended.GridFTPServerFacade;
+
 import org.ietf.jgss.GSSException;
 
 import au.org.arcs.griffin.common.FtpConstants;

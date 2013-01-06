@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.text.MessageFormat;
@@ -18,6 +17,7 @@ import org.apache.sshd.server.FileSystemAware;
 import org.apache.sshd.server.FileSystemView;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,9 +147,7 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
                 }
             }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-            log.error("Session closed because of error while executing command", e);
+			log.error("Session closed because of error while executing command", e);
 		} finally {
             terminated = true;
             getCmdReader().abort();
@@ -201,7 +199,7 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
         }
         return proceed;
     }
-   protected String readLine() throws IOException {
+    protected String readLine() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (;;) {
             int c = in.read();

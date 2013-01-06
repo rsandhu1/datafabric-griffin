@@ -29,7 +29,6 @@ import java.util.Properties;
 import javax.net.ssl.SSLContext;
 
 import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSException;
 
 import au.org.arcs.griffin.exception.FtpConfigException;
 

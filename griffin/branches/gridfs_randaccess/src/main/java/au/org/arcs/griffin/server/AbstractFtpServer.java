@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -44,7 +43,6 @@ import au.org.arcs.griffin.common.FtpServerOptions;
 import au.org.arcs.griffin.common.FtpSessionContext;
 import au.org.arcs.griffin.filesystem.FileSystem;
 import au.org.arcs.griffin.session.FtpSession;
-import au.org.arcs.griffin.usermanager.UserManager;
 import au.org.arcs.griffin.utils.AbstractAppAwareBean;
 import au.org.arcs.griffin.utils.IOUtils;
 import au.org.arcs.griffin.utils.NetUtils;

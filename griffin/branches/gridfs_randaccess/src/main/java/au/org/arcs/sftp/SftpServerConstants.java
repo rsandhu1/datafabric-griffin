@@ -1,6 +1,5 @@
 package au.org.arcs.sftp;
 
-import au.org.arcs.sftp.SftpConstants;
 
 /**
  * General constants of the application.

@@ -52,15 +52,10 @@ import au.org.arcs.griffin.utils.IOUtils;
 public class FtpSessionImpl extends Thread implements FtpSession, FtpConstants {
 
     private static final int  DEFAULT_IDLE_SECONDS = 60;
-
     private static final int  COMMAND_TIMEOUT      = 3000;
-
     private static Log        log                  = LogFactory.getLog(FtpSessionImpl.class);
-
     private FtpCmdReader      cmdReader;
-
     private FtpSessionContext ftpContext;
-
     private boolean           terminated;
 
     /**
@@ -152,8 +147,7 @@ public class FtpSessionImpl extends Thread implements FtpSession, FtpConstants {
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
         String welcome = formatResString(MSG220, new Object[] {hostname, title, version});
 //        getFtpContext().getClientResponseWriter().println(welcome);

@@ -27,11 +27,8 @@ package au.org.arcs.griffin.cmd.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import au.org.arcs.griffin.cmd.AbstractFtpCmdPort;
 
 /**
  * <b>The EPRT Command (EPRT)</b>

@@ -19,8 +19,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
-import org.apache.sshd.common.channel.AbstractChannel;
-
 import au.org.arcs.sftp.SftpConstants;
 import au.org.arcs.sftp.SftpProtocolConstants;
 

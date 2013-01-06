@@ -2,21 +2,16 @@ package au.org.arcs.griffin.cmd.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.cmd.AbstractFtpCmd;
-import au.org.arcs.griffin.cmd.AbstractFtpCmdList;
 import au.org.arcs.griffin.cmd.AbstractFtpCmdMlsx;
 import au.org.arcs.griffin.cmd.DataChannel;
 import au.org.arcs.griffin.common.FtpSessionContext;
 import au.org.arcs.griffin.exception.FtpCmdException;
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.streams.EBlockModeOutputStream;
-import au.org.arcs.griffin.utils.IOUtils;
 
 /**
  * <b> Listings for Machine Processing </b>
@@ -100,10 +95,10 @@ public class FtpCmdMlsd extends AbstractFtpCmdMlsx {
             if (mode==MODE_EBLOCK) ((EBlockModeOutputStream)os).finalizeRecord(true);
             out("226 MLSD completed");
         } catch (IOException e) {
-        	e.printStackTrace();
+            log.error(e, e);
             msgOut(MSG550);
         } catch (Exception e) {
-        	e.printStackTrace();
+            log.error(e, e);
             msgOut(MSG550);
         } finally {
 //            IOUtils.closeGracefully(os);

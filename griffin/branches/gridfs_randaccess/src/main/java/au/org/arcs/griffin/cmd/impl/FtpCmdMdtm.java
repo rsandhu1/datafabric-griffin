@@ -24,7 +24,6 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

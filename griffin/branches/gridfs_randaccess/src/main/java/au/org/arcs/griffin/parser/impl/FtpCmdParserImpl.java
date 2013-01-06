@@ -27,7 +27,6 @@ package au.org.arcs.griffin.parser.impl;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 

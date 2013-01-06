@@ -13,13 +13,10 @@ import javax.net.ServerSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.common.FtpSessionContext;
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.streams.DataChannelOutputStream;
 import au.org.arcs.griffin.streams.EDataBlock;
-import au.org.arcs.griffin.streams.RafInputStream;
-import au.org.arcs.griffin.streams.RafOutputStream;
 import au.org.arcs.griffin.streams.SynchronizedInputStream;
 import au.org.arcs.griffin.streams.SynchronizedOutputStream;
 import au.org.arcs.griffin.utils.IOUtils;
@@ -152,8 +149,7 @@ public class TCPDataChannel implements DataChannel {
 			try {
 				log.debug("clientSocket.getKeepAlive():"+clientSocket.getKeepAlive());
 			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e.getMessage(), e);
 			}
 			log.debug("clientSocket.isConnected():"+clientSocket.isConnected());
 			log.debug("clientSocket.isOutputShutdown():"+clientSocket.isOutputShutdown());
@@ -222,7 +218,7 @@ public class TCPDataChannel implements DataChannel {
 	            }
 //	            say("Adapter: done, EOD received ? = " + eod);
 	        } catch (IOException e) {
-	        	e.printStackTrace();
+	            log.error(e.getMessage(), e);
 //	            esay(e);
 	            // what can we do here ??
 
@@ -286,8 +282,7 @@ public class TCPDataChannel implements DataChannel {
 		        	eDataBlock.writeHeader(this);
 	            }
 	        } catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	            log.error(e.getMessage(), e);
 //			} finally {
 //	            IOUtils.closeGracefully(is);
 //	            IOUtils.closeGracefully(os);

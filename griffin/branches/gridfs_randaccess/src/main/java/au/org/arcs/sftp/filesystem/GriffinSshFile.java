@@ -5,16 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.sshd.server.SshFile;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.filesystem.FileObject;
-import au.org.arcs.griffin.streams.RafInputStream;
 import au.org.arcs.griffin.streams.RafOutputStream;
 
 /**
@@ -206,24 +205,22 @@ public class GriffinSshFile implements SshFile
 	 * List files. If not a directory or does not exist, null will be returned.
 	 */
 	@Override
-	public List<SshFile> listSshFiles()
-	{
+	public List<SshFile> listSshFiles() {
 		FileObject[] files_cache=null;
 		try {
 			files_cache = fileObject.listFiles();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e.getMessage(), e);
 		}
 		if(files_cache==null)
 			return null;
 		
         // now make Griffin files
 		List<SshFile> list=new ArrayList<SshFile>(files_cache.length);
- 		for (FileObject foc : files_cache)
-		{
- 			if(!foc.getName().isEmpty())
+ 		for (FileObject foc : files_cache) {
+ 			if(!foc.getName().isEmpty()) {
  				list.add(new GriffinSshFile(foc));
+ 			}
 		}
  		
 		return list;
@@ -264,14 +261,12 @@ public class GriffinSshFile implements SshFile
 	}
 
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof GriffinSshFile)
 			try {
 				return FilenameUtils.equalsNormalizedOnSystem(fileObject.getCanonicalPath(),(((GriffinSshFile) obj).fileObject.getCanonicalPath()));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e.getMessage(), e);
 			}
 		return false;
 	}

@@ -2,7 +2,6 @@ package au.org.arcs.griffin.filesystem;
 
 import java.io.IOException;
 
-
 import org.ietf.jgss.GSSCredential;
 
 import au.org.arcs.griffin.exception.FtpConfigException;

@@ -31,7 +31,6 @@ import java.util.ResourceBundle;
 import javax.net.ServerSocketFactory;
 
 import au.org.arcs.griffin.common.FtpSessionContext;
-import au.org.arcs.griffin.filesystem.FileSystem;
 import au.org.arcs.griffin.server.AbstractFtpServer;
 import au.org.arcs.griffin.session.impl.FtpSessionContextImpl;
 

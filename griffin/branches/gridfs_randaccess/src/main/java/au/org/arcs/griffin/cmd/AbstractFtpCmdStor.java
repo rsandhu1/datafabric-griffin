@@ -26,8 +26,6 @@ package au.org.arcs.griffin.cmd;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,8 +81,7 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
             log.debug("storing file: " + file.getCanonicalPath()
                       + " in mode=" + mode + "; max thread=" + maxThread+"; bufferSize="+getCtx().getBufferSize());
         } catch (IOException e1) {
-            log.error("Problem accessing file attributes: " + e1.getMessage());
-            e1.printStackTrace();
+            log.error("Problem accessing file attributes: " + e1.getMessage(), e1);
         }
 
         try {
@@ -150,9 +147,9 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
             log.error(e.toString());
         } catch (IOException e) {
             msgOut(MSG550_MSG, e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             msgOut(MSG550);
             log.error(e.toString());
         } finally {

@@ -35,17 +35,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.ietf.jgss.GSSException;
 
-import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.common.FtpSessionContext;
-import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.filesystem.RandomAccessFileObject;
 import au.org.arcs.griffin.streams.SynchronizedOutputStream;
 import au.org.arcs.griffin.utils.IOUtils;
@@ -59,22 +55,12 @@ import au.org.arcs.griffin.utils.IOUtils;
 public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 
     private static final int  MAX_BIND_RETRIES     = 3;
-
     private static final int  DATA_CHANNEL_TIMEOUT = 10000;
-
     private static Log        log                  = LogFactory.getLog(PassiveModeTCPDataChannelProvider.class);
-
-
     private ServerSocket      serverSocket;
-
-
     private int               preferredProtocol;
-    
-    
     private boolean running;
-    
     private SynchronizedOutputStream sos;
-    
     private int eodNum;
     private int dataChannelCount;
     private long offset;
@@ -141,8 +127,7 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			try {
 				sos.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e, e);
 			}
 		sos=null;
         if (channels != null) {
@@ -170,12 +155,10 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 		try {
 			dc = new TCPDataChannel(wrapSocket(dataSocket, false),ctx, 0);
 		} catch (GSSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e, e);
 			throw new IOException(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e, e);
 			throw new IOException(e.getMessage());
 		}
 //		dc.setDirection(direction);
@@ -251,19 +234,16 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 					t.start();
 					num++;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					running=false;
+				    log.error(e, e);
+					running = false;
 					break;
 				} catch (GSSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					running=false;
+				    log.error(e, e);
+					running = false;
 					break;
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					running=false;
+				    log.error(e, e);
+					running = false;
 					break;
 				}
 			}
@@ -321,8 +301,7 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 					log.debug("thread "+t+" joined.");
 					t.join();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e, e);
 				}
 			}
 		}
@@ -331,8 +310,7 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			try {
 				sos.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e, e);
 			}
 			sos=null;
 		}

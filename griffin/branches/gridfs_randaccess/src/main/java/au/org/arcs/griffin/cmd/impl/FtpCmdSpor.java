@@ -5,11 +5,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.cmd.AbstractFtpCmd;
 import au.org.arcs.griffin.cmd.AbstractFtpCmdPort;
-import au.org.arcs.griffin.cmd.ActiveModeSocketProvider;
-import au.org.arcs.griffin.cmd.DataChannelInfo;
-import au.org.arcs.griffin.cmd.SocketProvider;
 import au.org.arcs.griffin.exception.FtpCmdException;
 
 /**

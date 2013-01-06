@@ -69,8 +69,7 @@ public class SynchronizedInputStream {
 			try {
 				dataQueue.put(eDataBlock);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e, e);
 				throw new IOException(e.getMessage());
 			}
 		}
@@ -85,9 +84,8 @@ public class SynchronizedInputStream {
 			eDataBlock.setData(nextBlock.getData());
 			return (int) nextBlock.getSize();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IOException(e.getMessage());
+		    log.error(e, e);
+            throw new IOException(e.getMessage());
 		}
 	}
 	
@@ -104,8 +102,7 @@ public class SynchronizedInputStream {
 			try {
 				dataQueue.put(eDataBlock);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e, e);
 			}
 		}
 	}

@@ -29,9 +29,8 @@ public class SynchronizedOutputStream {
 			newBlock.setData(eDataBlock.getData());
 			dataQueue.put(newBlock);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IOException(e.getMessage());
+		    log.error(e, e);
+            throw new IOException(e.getMessage());
 		}
 	}
 	public void close() throws IOException{
@@ -54,9 +53,8 @@ public class SynchronizedOutputStream {
 	                ctx.getTransferMonitor().execute(eDataBlock.getOffset(), eDataBlock.getSize());
 				}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IOException(e.getMessage());
+			    log.error(e, e);
+                throw new IOException(e.getMessage());
 			}
 		}
 	}

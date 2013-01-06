@@ -24,9 +24,7 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
 import java.io.IOException;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,16 +69,14 @@ public class FtpCmdRmd extends AbstractFtpCmd {
 						deleted = delete(dir);
 				        response = deleted ? msg(MSG250) : msg(MSG450);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					    log.error(e, e);
 						msgOut(MSG500_ERROR, new String[]{e.getMessage()});
 				        return;
 					}
 
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e, e);
 				msgOut(MSG500_ERROR, new String[]{e.getMessage()});
 		        return;
 			}

@@ -8,16 +8,15 @@ import java.net.InetSocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.barchart.udt.ExceptionUDT;
-import com.barchart.udt.MonitorUDT;
-import com.barchart.udt.OptionUDT;
-import com.barchart.udt.SocketUDT;
-import com.barchart.udt.TypeUDT;
-
 import au.org.arcs.griffin.common.FtpSessionContext;
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.streams.SynchronizedInputStream;
 import au.org.arcs.griffin.streams.SynchronizedOutputStream;
+
+import com.barchart.udt.ExceptionUDT;
+import com.barchart.udt.OptionUDT;
+import com.barchart.udt.SocketUDT;
+import com.barchart.udt.TypeUDT;
 
 public class UDTDataChannel implements DataChannel {
     private static final int  MAX_BIND_RETRIES     = 3;
@@ -65,14 +64,12 @@ public class UDTDataChannel implements DataChannel {
 		try {
 			if (clientUDT!=null) clientUDT.close();
 		} catch (ExceptionUDT e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e.getMessage(), e);
 		}
 		try {
 			if (socketUDT!=null) socketUDT.close();
 		} catch (ExceptionUDT e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e.getMessage(), e);
 		}
 
 	}

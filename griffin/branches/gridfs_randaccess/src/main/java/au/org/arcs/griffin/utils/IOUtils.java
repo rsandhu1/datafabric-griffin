@@ -39,8 +39,10 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 
 import au.org.arcs.griffin.filesystem.FileObject;
@@ -54,12 +56,10 @@ import au.org.arcs.griffin.filesystem.FileObject;
 public final class IOUtils {
 
     private static final int        FILE_SIZE_LENGTH_UNIX = 11;
-
     private static final DateFormat DATE_FORMAT_UNIX      = new SimpleDateFormat("MMM dd HH:mm", Locale.US);
-
     private static final String     APP_PROPERTIES        = "/app.properties";
-
     private static Properties       appProperties;
+    private static Log log = LogFactory.getLog(IOUtils.class);
 
     /**
      * Constructor hidden.
@@ -176,7 +176,7 @@ public final class IOUtils {
             try {
                 appProperties.load(is);
             } catch (IOException e) {
-                e.printStackTrace(System.out);
+                log.error(e.getMessage(), e);
             }
         }
         return appProperties;

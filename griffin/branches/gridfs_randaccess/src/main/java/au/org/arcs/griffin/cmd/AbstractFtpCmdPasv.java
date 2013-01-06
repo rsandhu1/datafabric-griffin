@@ -26,7 +26,6 @@ package au.org.arcs.griffin.cmd;
 
 import java.io.IOException;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -81,16 +80,13 @@ public abstract class AbstractFtpCmdPasv extends AbstractFtpCmd {
              */
 
         } catch (FtpIllegalProtocolVersion e) {
-        	e.printStackTrace();
-//            log.error(e.toString());
+            log.debug(e.getMessage(), e);
             msgOut(MSG522);
         } catch (IOException e) {
-        	e.printStackTrace();
-//            log.error(e.toString());
+            log.debug(e.getMessage(), e);
             msgOut(MSG425);
         } catch (RuntimeException e) {
-        	e.printStackTrace();
-//            log.error(e.toString());
+            log.debug(e.getMessage(), e);
             msgOut(MSG501);
         }
     }

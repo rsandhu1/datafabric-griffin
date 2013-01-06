@@ -31,7 +31,6 @@ import au.org.arcs.griffin.common.FtpEventListener;
 import au.org.arcs.griffin.common.FtpServerOptions;
 import au.org.arcs.griffin.filesystem.FileSystem;
 import au.org.arcs.griffin.session.FtpSession;
-import au.org.arcs.griffin.usermanager.UserManager;
 
 
 /**

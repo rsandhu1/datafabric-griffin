@@ -24,21 +24,10 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.IOException;
-
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.StringUtils;
 
 import au.org.arcs.griffin.cmd.AbstractFtpCmd;
-import au.org.arcs.griffin.cmd.ClientSocketModifier;
 import au.org.arcs.griffin.exception.FtpCmdException;
 
 /**

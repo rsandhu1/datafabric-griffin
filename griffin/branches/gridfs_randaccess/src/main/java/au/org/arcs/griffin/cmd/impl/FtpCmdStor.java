@@ -24,11 +24,8 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.InputStream;
-
 import au.org.arcs.griffin.cmd.AbstractFtpCmdStorFile;
 import au.org.arcs.griffin.exception.FtpCmdException;
-import au.org.arcs.griffin.filesystem.FileObject;
 
 
 /**

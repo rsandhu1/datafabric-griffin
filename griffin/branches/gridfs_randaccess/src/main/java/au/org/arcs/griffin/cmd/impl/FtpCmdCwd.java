@@ -24,10 +24,8 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -63,8 +61,7 @@ public class FtpCmdCwd extends AbstractFtpCmd {
         try {
 			path=dir.getCanonicalPath();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e, e);
 			path=null;
 		}
 

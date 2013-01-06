@@ -26,11 +26,8 @@ package au.org.arcs.griffin.cmd;
 
 import java.io.IOException;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import au.org.arcs.griffin.exception.FtpCmdException;
 
 /**
  * Abstract super class of commands setting up the data channel in passive mode (PASV, EPSV).
@@ -42,13 +39,9 @@ public abstract class AbstractFtpCmdPort extends AbstractFtpCmd {
 
     private static Log log = LogFactory.getLog(AbstractFtpCmdPort.class);
     private static final String DOT = ".";
-
     private int                 port;
-
     private String              addr;
-
     private String              lastArgs;
-
 
     /**
      * Sets up the data channel in active transfer mode. IPv4 and IPv6 are supported.

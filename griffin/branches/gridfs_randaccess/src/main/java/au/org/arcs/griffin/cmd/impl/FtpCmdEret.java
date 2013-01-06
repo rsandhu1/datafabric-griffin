@@ -24,24 +24,10 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.cmd.AbstractFtpCmdRetr;
-import au.org.arcs.griffin.cmd.DataChannel;
 import au.org.arcs.griffin.exception.FtpCmdException;
-import au.org.arcs.griffin.exception.FtpPermissionException;
-import au.org.arcs.griffin.filesystem.FileObject;
-import au.org.arcs.griffin.streams.EDataBlock;
-import au.org.arcs.griffin.streams.RafInputStream;
-import au.org.arcs.griffin.streams.RecordWriteSupport;
-import au.org.arcs.griffin.utils.IOUtils;
 
 /**
  * <b>EXTENDED RETRIEVE (ERET)</b>

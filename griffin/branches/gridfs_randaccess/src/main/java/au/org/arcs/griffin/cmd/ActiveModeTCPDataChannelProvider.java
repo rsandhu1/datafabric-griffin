@@ -28,22 +28,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocket;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.ietf.jgss.GSSException;
 
-import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.common.FtpSessionContext;
-import au.org.arcs.griffin.filesystem.FileObject;
-import au.org.arcs.griffin.streams.RafInputStream;
 import au.org.arcs.griffin.streams.SynchronizedInputStream;
-import au.org.arcs.griffin.utils.IOUtils;
 
 /**
  * Provider for the client socket (active transfer). The creation of the socket is deferred until it
@@ -95,12 +87,10 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 		try {
 			dc = new TCPDataChannel(wrapSocket(socket, true), ctx, 0);
 		} catch (GSSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		}
         channels.add(dc);
@@ -116,8 +106,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			try {
 				sis.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e.getMessage(), e);
 			}
 		sis=null;
         if (channels != null) {
@@ -154,8 +143,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 					log.debug("thread "+i+" joined.");
 					transferThreads[i].join();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e.getMessage(), e);
 				}
 		}
 		log.debug("all threads finished(?) channels.size()="+channels.size());
@@ -163,8 +151,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			try {
 				sis.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e.getMessage(), e);
 			}
 			sis=null;
 		}
@@ -194,12 +181,10 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 				try {
 					dc = new TCPDataChannel(wrapSocket(s, true),ctx,i);
 				} catch (GSSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e.getMessage(), e);
 					throw new IOException(e.getMessage());
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e.getMessage(), e);
 					throw new IOException(e.getMessage());
 				}
 				channels.add(dc);
@@ -259,8 +244,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 					log.debug("thread "+i+" joined.");
 					transferThreads[i].join();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    log.error(e.getMessage(), e);
 				}
 		}
 		log.debug("all threads finished(?) channels.size()="+channels.size());
@@ -268,8 +252,7 @@ public class ActiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			try {
 				sis.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    log.error(e.getMessage(), e);
 			}
 			sis=null;
 		}

@@ -2,7 +2,6 @@ package au.org.arcs.griffin.server.impl;
 
 import java.util.ResourceBundle;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

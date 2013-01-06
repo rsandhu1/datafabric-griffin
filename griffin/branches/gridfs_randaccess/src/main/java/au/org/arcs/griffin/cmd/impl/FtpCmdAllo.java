@@ -24,10 +24,6 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.IOException;
-
-
-import org.apache.commons.io.FileSystemUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

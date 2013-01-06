@@ -1,7 +1,6 @@
 package au.org.arcs.griffin.cmd;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,12 +8,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.cmd.AbstractFtpCmd;
-import au.org.arcs.griffin.cmd.AbstractFtpCmdList;
-import au.org.arcs.griffin.common.FtpSessionContext;
-import au.org.arcs.griffin.exception.FtpCmdException;
 import au.org.arcs.griffin.filesystem.FileObject;
-import au.org.arcs.griffin.utils.IOUtils;
 import au.org.arcs.griffin.utils.SecurityUtil;
 
 /**
@@ -109,12 +103,10 @@ abstract public class AbstractFtpCmdMlsx extends AbstractFtpCmd {
         try {
 			buffer.append(SecurityUtil.encodePassword(file.getCanonicalPath(), "MD5"));
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e, e);
 			buffer.append("unique-id");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.error(e, e);
 			buffer.append("unique-id");
 		}
         buffer.append(";");

@@ -33,7 +33,6 @@ import org.ietf.jgss.GSSException;
 
 import au.org.arcs.griffin.cmd.AbstractFtpCmd;
 import au.org.arcs.griffin.exception.FtpCmdException;
-import au.org.arcs.griffin.exception.FtpConfigException;
 
 
 /**

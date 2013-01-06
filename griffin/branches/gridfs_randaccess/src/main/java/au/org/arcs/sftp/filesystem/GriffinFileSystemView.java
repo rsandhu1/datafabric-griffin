@@ -4,14 +4,14 @@ import java.io.IOException;
 
 import org.apache.sshd.server.SshFile;
 import org.apache.sshd.server.session.ServerSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.org.arcs.sftp.SftpServerSession;
-//import au.org.arcs.sftp.filesystem.SftpFileSystemView;
-
 import au.org.arcs.griffin.filesystem.FileObject;
 import au.org.arcs.griffin.filesystem.FileSystemConnection;
+import au.org.arcs.sftp.SftpServerSession;
+//import au.org.arcs.sftp.filesystem.SftpFileSystemView;
 
 /**
  * <strong>Internal class, do not use directly.</strong>

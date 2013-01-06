@@ -1,12 +1,8 @@
 package au.org.arcs.griffin.cmd.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.griffin.cmd.AbstractFtpCmd;
 import au.org.arcs.griffin.cmd.AbstractFtpCmdMlsx;
 import au.org.arcs.griffin.exception.FtpCmdException;
 import au.org.arcs.griffin.filesystem.FileObject;

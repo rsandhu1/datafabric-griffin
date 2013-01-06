@@ -45,9 +45,7 @@ import au.org.arcs.griffin.filesystem.FileObject;
 public abstract class AbstractFtpCmdRetr extends AbstractFtpCmd implements FtpConstants {
 
     private static Log          log                 = LogFactory.getLog(AbstractFtpCmdRetr.class);
-
     private long                fileSize;
-
     private boolean             abortRequested;
 
     /**

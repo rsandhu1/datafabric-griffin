@@ -47,8 +47,7 @@ public class FtpCmdEnc extends AbstractFtpCmd {
                                                        prop);
         } catch (GSSException e) {
             msgOut(MSG500_DECRYPT, new String[] {e.getMessage()});
-            log.error("secure_command: got GSSException: " + e.getMessage());
-            e.printStackTrace();
+            log.error("secure_command: got GSSException: " + e.getMessage(), e);
             return;
         }
 
