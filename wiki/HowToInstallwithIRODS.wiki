@@ -17,3 +17,11 @@ JAVA_OPTIONS="-DGRIFFIN_HOME=$APP_HOME -Djava.library.path=$APP_HOME -Dlog4j.con
 }}}
   * trustStore is useful if you want to user LDAP authentication in iRODS 3.2
   * userid is useful if you want to use public key authentication in SFTP/GridFTP over SSH
+ * copy griffin to /etc/init.d
+ * Edit log4j.properties and update your path
+{{{
+log4j.appender.R.File=/opt/griffin/logs/griffin.log
+}}}
+ * change permission of everything under /opt/griffin to be owned by 'rods'
+ * Edit configuration file griffin-ctx.xml
+ * Start Griffin using 'service griffin start'
