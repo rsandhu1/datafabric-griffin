@@ -25,5 +25,5 @@ log4j.appender.R.File=/opt/griffin/logs/griffin.log
  * change permission of everything under /opt/griffin to be owned by 'rods'
  * Edit configuration file griffin-ctx.xml
   * [IrodsConfiguration iRODS]
-  * [SSH configuration SSHnPublicKeyAuth]
+  * [SSHCconfiguration SSHnPublicKeyAuth]
  * Start Griffin using 'service griffin start'
