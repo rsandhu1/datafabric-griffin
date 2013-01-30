@@ -62,7 +62,7 @@ import au.org.arcs.sftp.command.GridFTPCommandFactory;
 import au.org.arcs.sftp.command.ScpCommandFactory;
 import au.org.arcs.sftp.filesystem.GriffinFileSystemFactory;
 import au.org.arcs.sftp.utils.SftpLog;
-//import au.org.arcs.sftp.SftpSubsystem;
+//import au.org.arcs.sftp.filesystem.SftpSubsystem;
 //import au.org.arcs.sftp.filesystem.GriffinFileSystemFactory;
 
 /**

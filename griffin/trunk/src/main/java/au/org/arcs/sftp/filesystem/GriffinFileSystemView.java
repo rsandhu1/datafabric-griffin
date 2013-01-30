@@ -64,6 +64,7 @@ public class GriffinFileSystemView extends SftpFileSystemView
 	@Override
 	public SshFile getFile(String path)
 	{
+		log.debug("getFile:"+path);
 		// get actual file object
 		FileObject file_obj=getFileSystemConnection().getFileObject(path);
 		return new GriffinSshFile(file_obj);
@@ -79,7 +80,7 @@ public class GriffinFileSystemView extends SftpFileSystemView
 	public SshFile getFile(SshFile baseDir, String file)
 	{
 		// TODO What is needed here
-		log.debug("getFile:"+baseDir.getAbsolutePath()+"/"+file);
+		log.debug("getFile with base:"+baseDir.getAbsolutePath()+"/"+file);
 		FileObject file_obj=getFileSystemConnection().getFileObject(baseDir.getAbsolutePath()+"/"+file);
 		return new GriffinSshFile(file_obj);
 		//return getFile(file);

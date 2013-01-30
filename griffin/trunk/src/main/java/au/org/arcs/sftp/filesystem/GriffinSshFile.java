@@ -57,6 +57,7 @@ public class GriffinSshFile implements SshFile
 	 */
 	public String getName()
 	{
+		log.debug("getName:"+fileObject.getName());
 		return fileObject.getName();
 	}
 
@@ -65,6 +66,7 @@ public class GriffinSshFile implements SshFile
 	 */
 	public boolean isDirectory()
 	{
+		log.debug("isDirectory("+fileObject.getName()+")?"+fileObject.isDirectory());
 		return fileObject.isDirectory();
 	}
 
@@ -208,13 +210,20 @@ public class GriffinSshFile implements SshFile
 	@Override
 	public List<SshFile> listSshFiles()
 	{
+		log.debug("listSshFiles");
+        // is a directory
+        if (!fileObject.isDirectory()) {
+            return null;
+        }
 		FileObject[] files_cache=null;
 		try {
 			files_cache = fileObject.listFiles();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("listSshFiles error", e);
 		}
+		log.debug("listSshFiles files_cache:"+files_cache);
 		if(files_cache==null)
 			return null;
 		
@@ -225,7 +234,7 @@ public class GriffinSshFile implements SshFile
  			if(!foc.getName().isEmpty())
  				list.add(new GriffinSshFile(foc));
 		}
- 		
+ 		log.debug("listSshFiles result:"+list);
 		return list;
 	}
 
