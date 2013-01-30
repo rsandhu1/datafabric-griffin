@@ -20,11 +20,13 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.globus.myproxy.GetParams;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.irods.jargon.core.connection.GSIIRODSAccount;
 import org.irods.jargon.core.connection.IRODSAccount;
-import org.irods.jargon.core.connection.IRODSCommands;
 import org.irods.jargon.core.connection.IRODSAccount.AuthScheme;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
@@ -131,13 +133,6 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 				throws NullPointerException, IOException {
     	this.jargonFileSystem=jargonFileSystem;
 		String authType=defaultAuthType;
-		if (username.indexOf('\\')>-1){
-			authType=username.substring(0,username.indexOf('\\'));
-			username=username.substring(username.indexOf('\\')+1);
-		} else if (username.indexOf('/')>-1) {
-			authType=username.substring(0,username.indexOf('/'));
-			username=username.substring(username.indexOf('/')+1);
-		}
 		log.debug("server:" + serverName + " serverPort:" + serverPort
 				+ " user: " + username + "@" + zoneName + " authType:" + authType
 				 );
@@ -163,6 +158,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 			}
 			throw new IOException(e.getMessage());
 		} 
+		
 	}
 
     
@@ -234,5 +230,6 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 	public IRODSFileFactory getFileFactory() {
 		return fileFactory;
 	}
+
     
 }

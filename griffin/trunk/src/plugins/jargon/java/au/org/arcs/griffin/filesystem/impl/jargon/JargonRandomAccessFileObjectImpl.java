@@ -16,6 +16,7 @@
 
 package au.org.arcs.griffin.filesystem.impl.jargon;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.irods.jargon.core.exception.JargonException;
@@ -43,11 +44,11 @@ public class JargonRandomAccessFileObjectImpl implements RandomAccessFileObject 
      *          "r" and "rw" should be suppported. 
      * @throws IOException If file access fails or privileges are insufficient.
      */
-    public JargonRandomAccessFileObjectImpl(JargonFileSystemConnectionImpl connection, IRODSFile file, String mode)
+    public JargonRandomAccessFileObjectImpl(JargonFileSystemConnectionImpl connection, File file, String mode)
             throws IOException {
         if (file instanceof IRODSFile) {
             try {
-				raf = connection.getFileFactory().instanceIRODSRandomAccessFile(file);
+				raf = connection.getFileFactory().instanceIRODSRandomAccessFile(file.getCanonicalPath());
 			} catch (JargonException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

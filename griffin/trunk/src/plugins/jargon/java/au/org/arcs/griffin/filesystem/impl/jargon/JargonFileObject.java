@@ -15,6 +15,7 @@
 
 package au.org.arcs.griffin.filesystem.impl.jargon;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,7 +42,7 @@ import au.org.arcs.griffin.filesystem.RandomAccessFileObject;
 public class JargonFileObject implements FileObject {
 	private static Log          log                 = LogFactory.getLog(JargonFileObject.class);
 	
-    protected IRODSFile remoteFile = null;
+    protected File remoteFile = null;
     protected JargonFileSystemConnectionImpl connection = null;
     protected String originalName;
 	public static final int JARGON_MAX_QUERY_NUM = 100000;
@@ -57,7 +58,7 @@ public class JargonFileObject implements FileObject {
                             String path) throws IOException{
         this.connection = aConnection;
         try {
-			remoteFile = aConnection.getFileFactory().instanceIRODSFile(path);
+			remoteFile = aConnection.getFileFactory().instanceIRODSFile(path).getCanonicalFile();
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -73,7 +74,7 @@ public class JargonFileObject implements FileObject {
      * @param file iRODS file object.
      */
     public JargonFileObject(JargonFileSystemConnectionImpl aConnection,
-    		IRODSFile file) {
+    		File file) {
         this.connection = aConnection;
         this.remoteFile = file;
     }
@@ -146,13 +147,7 @@ public class JargonFileObject implements FileObject {
     	String[] files=remoteFile.list();
     	FileObject[] fileObjects=new FileObject[files.length];
     	for (int i=0;i<files.length;i++){
-    		try {
-				fileObjects[i]=new JargonFileObject(connection, connection.getFileFactory().instanceIRODSFile(remoteFile.getParent()+"/"+files[i]));
-			} catch (JargonException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IOException(e.getMessage());
-			}
+			fileObjects[i]=new JargonFileObject(connection, remoteFile.getCanonicalPath()+"/"+files[i]);
     	}
     	return fileObjects;
     	
@@ -359,10 +354,22 @@ public class JargonFileObject implements FileObject {
      */
     public boolean renameTo(FileObject file) {
         if (file instanceof JargonFileObject) {
-            return remoteFile.renameTo(((JargonFileObject) file).getRemoteFile());
+        	IRODSFile irodsFile;
+			try {
+				irodsFile = connection.getFileFactory().instanceIRODSFile(remoteFile.getCanonicalPath());
+	        	IRODSFile destIrodsFile=connection.getFileFactory().instanceIRODSFile(file.getCanonicalPath());
+	            return irodsFile.renameTo(destIrodsFile);
+			} catch (JargonException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } else {
             return false;
         }
+		return false;
     }
 
     /**
@@ -374,14 +381,6 @@ public class JargonFileObject implements FileObject {
 //        return remoteFile.setLastModified(t);
     }
 
-    /**
-     * Gives access to the iRODS remote file object.
-     * 
-     * @return Reference to the iRODS file object.
-     */
-    public IRODSFile getRemoteFile() {
-        return remoteFile;
-    }
 
 	@Override
 	public boolean create() {
@@ -405,7 +404,7 @@ public class JargonFileObject implements FileObject {
 	public OutputStream getOutputStream() throws IOException {
 		// TODO Auto-generated method stub
 		try {
-			return connection.getFileFactory().instanceIRODSFileOutputStream(remoteFile);
+			return connection.getFileFactory().instanceIRODSFileOutputStream(remoteFile.getCanonicalPath());
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -417,7 +416,7 @@ public class JargonFileObject implements FileObject {
 	public InputStream getInpuStream(long offset) throws IOException {
 		// TODO Auto-generated method stub
 		try {
-			IRODSFileInputStream in = connection.getFileFactory().instanceIRODSFileInputStream(remoteFile);
+			IRODSFileInputStream in = connection.getFileFactory().instanceIRODSFileInputStream(remoteFile.getCanonicalPath());
 			in.skip(offset);
 			return in;
 		} catch (JargonException e) {

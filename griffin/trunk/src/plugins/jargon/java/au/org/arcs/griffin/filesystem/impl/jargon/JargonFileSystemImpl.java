@@ -20,8 +20,12 @@ import org.apache.commons.logging.LogFactory;
 import org.globus.gsi.GlobusCredential;
 import org.globus.gsi.GlobusCredentialException;
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl;
+import org.globus.myproxy.GetParams;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.irods.jargon.core.connection.GSIIRODSAccount;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSProtocolManager;
 import org.irods.jargon.core.connection.IRODSSession;
@@ -33,6 +37,7 @@ import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.UserAO;
 import org.irods.jargon.core.pub.domain.User;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.pub.io.IRODSFileFactoryImpl;
 import org.irods.jargon.core.query.RodsGenQueryEnum;
 
 import au.org.arcs.griffin.common.FtpConstants;
@@ -63,6 +68,8 @@ public class JargonFileSystemImpl implements FileSystem {
 	private String adminCertFile;
 	private String adminKeyFile;
 	private String jargonInternalCacheBufferSize;
+    private String myProxyServerHost;
+    private int myProxyServerPort;
 	
 	public String getJargonInternalCacheBufferSize() {
 		return jargonInternalCacheBufferSize;
@@ -143,6 +150,22 @@ public class JargonFileSystemImpl implements FileSystem {
 
 	public void setDefaultAuthType(String defaultAuthType) {
 		this.defaultAuthType = defaultAuthType;
+	}
+
+	public String getMyProxyServerHost() {
+		return myProxyServerHost;
+	}
+
+	public void setMyProxyServerHost(String myProxyServerHost) {
+		this.myProxyServerHost = myProxyServerHost;
+	}
+
+	public int getMyProxyServerPort() {
+		return myProxyServerPort;
+	}
+
+	public void setMyProxyServerPort(int myProxyServerPort) {
+		this.myProxyServerPort = myProxyServerPort;
 	}
 
 	public FileSystemConnection createFileSystemConnection(
@@ -304,8 +327,52 @@ public class JargonFileSystemImpl implements FileSystem {
 		// TODO Auto-generated method stub
 		try {
 			if (defaultAuthType==null) defaultAuthType="irods";
-			FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, defaultAuthType, username, password, zoneName, defaultResource);
-			return connection;
+			String authType = defaultAuthType;
+			if (username.indexOf('\\')>-1){
+				authType=username.substring(0,username.indexOf('\\'));
+				username=username.substring(username.indexOf('\\')+1);
+			} else if (username.indexOf('/')>-1) {
+				authType=username.substring(0,username.indexOf('/'));
+				username=username.substring(username.indexOf('/')+1);
+			}
+			log.debug("authType:"+authType);
+			if (authType.equalsIgnoreCase("myproxy")) {
+		        try{
+		            MyProxy mp = new MyProxy(myProxyServerHost, myProxyServerPort);
+		            GetParams getRequest = new GetParams();
+		            getRequest.setCredentialName(null);
+		            getRequest.setLifetime(3600);
+//		            getRequest.setLifetime(DavisConfig.GSSCREDENTIALLIFETIME);
+		            getRequest.setPassphrase(password);
+		            getRequest.setUserName(username);
+		            GSSCredential gssCredential = mp.get(null,getRequest);
+		            if (gssCredential == null) {
+		            	log.debug("can't get gssCredential from myproxy: "+ myProxyServerHost);
+		            	throw new IOException("can't get gssCredential from myproxy");
+		            }
+		            try {
+						log.debug("gssCredential: "+ gssCredential.getName().toString());
+					} catch (GSSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, gssCredential, defaultResource);
+					return connection;
+		        }
+		        catch(MyProxyException e){
+		        	log.error("Caught MyProxy exception: ",e);
+		        	throw new IOException(e.getMessage());
+		        }
+		        catch(Exception e){
+		        	log.error("Caught exception during myproxy login: ",e);
+		        	throw new IOException(e.getMessage());
+		        }
+
+			}else{
+
+				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, authType, username, password, zoneName, defaultResource);
+				return connection;
+			}
 		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block
 			throw new FtpConfigException(e.getMessage());
