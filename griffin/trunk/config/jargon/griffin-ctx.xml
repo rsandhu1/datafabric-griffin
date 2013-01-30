@@ -146,7 +146,7 @@
 		</property>
 	</bean>
 
-	<bean id="sftpirods-options" class="au.org.arcs.sftpirods.config.SftpConfigProperties" singleton="true">
+	<bean id="sftpirods-options" class="au.org.arcs.sftp.config.SftpConfigProperties" singleton="true">
 	    <constructor-arg>
 	      <props>
 	        <!-- Optional include the SFTP Server Label, overrides the Label stored in app.properties-->
@@ -195,6 +195,7 @@
 		<property name="serverName" value="localhost" />
 		<property name="serverPort" value="1247" />
 		<property name="zoneName" value="testZone" />
+		<!-- auth type: irods, pam, myproxy -->
 		<property name="defaultAuthType" value="pam" />
 		<property name="jargonInternalCacheBufferSize" value="512000" />
 						<!-- if connecting to a slave, this is needed for irods2.3 and previous versions. -->
@@ -205,6 +206,10 @@
 		<!-- <property name="updateInterval" value="10" /> -->
 		<!-- default resource can be specified here. if no default resource is specified, it will be decided by the rule engine. -->
 		<!-- <property name="defaultResource" value="arcs-df.vpac.org" /> -->
+		<!-- for myproxy auth
+		<property name="myProxyServerHost" value="mp-ca.arcs.org.au" />
+        <property name="myProxyServerPort" value="7512" />
+		 -->
 	</bean>
 	
 <!-- Config for local file system -->
