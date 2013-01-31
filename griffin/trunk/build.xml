@@ -22,6 +22,7 @@
 	<property name="keystore" value="keystore.ks"/>
 	<property name="package" value="package"/>
 	<property name="bin" value="bin"/>
+	<property name="config" value="config"/>
 	
     <fileset id="lib.files" dir="${lib}/main">
         <include name="*.jar"/>
@@ -154,6 +155,9 @@
 			</tarfileset>
 			<tarfileset dir="${lib}/main" prefix="${application}-${version}-${plugin-name}/lib">
 			    <include name="*.jar"/>
+			</tarfileset>
+			<tarfileset dir="${config}/${plugin-name}" prefix="${application}-${version}-${plugin-name}/">
+			    <include name="*.xml"/>
 			</tarfileset>
 			<tarfileset dir="${lib}/${plugin-name}" prefix="${application}-${version}-${plugin-name}/plugins">
 			    <include name="*.jar"/>
