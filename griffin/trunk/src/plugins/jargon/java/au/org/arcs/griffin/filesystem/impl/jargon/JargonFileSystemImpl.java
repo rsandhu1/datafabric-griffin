@@ -347,11 +347,11 @@ public class JargonFileSystemImpl implements FileSystem {
 		            getRequest.setUserName(username);
 		            GSSCredential gssCredential = mp.get(null,getRequest);
 		            if (gssCredential == null) {
-		            	log.debug("can't get gssCredential from myproxy: "+ myProxyServerHost);
+		            	log.error("can't get gssCredential from myproxy: "+ myProxyServerHost+" for "+username);
 		            	throw new IOException("can't get gssCredential from myproxy");
 		            }
 		            try {
-						log.debug("gssCredential: "+ gssCredential.getName().toString());
+						log.info("gssCredential: "+ gssCredential.getName().toString());
 					} catch (GSSException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

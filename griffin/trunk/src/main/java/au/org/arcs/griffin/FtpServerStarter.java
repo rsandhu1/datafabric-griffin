@@ -193,11 +193,11 @@ public final class FtpServerStarter {
             List<FtpServer> serverList = new ArrayList<FtpServer>();
             serverList.add(svr);
 //            serverList.add(sslsvr);
-            addShutdownHook(serverList);
             if ("true".equalsIgnoreCase(svr.getSshEnabled())) {
             	server_details=new SftpServerDetails("","");
             	startSshServer();
             }
+            addShutdownHook(serverList, sshd);
             
         } catch (Exception e) {
             log.error("Unexpected error", e);
@@ -207,7 +207,7 @@ public final class FtpServerStarter {
     /**
      * Add shutdown hook.
      */
-    private static void addShutdownHook(final List<FtpServer> servers) {
+    private static void addShutdownHook(final List<FtpServer> servers, final SshServer sshd) {
 
         Runnable shutdownHook = new Runnable() {
             public void run() {
@@ -215,6 +215,12 @@ public final class FtpServerStarter {
                     log.info("Stopping server '" + ftpServer.getName() + "'.");
                     ftpServer.abort();
                 }
+                try {
+					if (sshd!=null) sshd.stop();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                 log.info("All servers down.");
             }
         };
@@ -372,7 +378,7 @@ public final class FtpServerStarter {
 		//Signal success
 		String successMsg=getServerDetails().getAppTitle()+" is running on Port: "+server_details.getOptions().getSftpPort()+"...";
 		log.info(successMsg);
-		System.err.println(successMsg);
+//		System.err.println(successMsg);
 	}
 
 	public void stopServer() throws InterruptedException

@@ -77,7 +77,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("GSI login failed.", e);
 			throw new IOException(e.getMessage());
 		}
     }
