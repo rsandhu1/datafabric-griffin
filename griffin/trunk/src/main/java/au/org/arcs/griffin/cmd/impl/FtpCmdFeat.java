@@ -167,6 +167,7 @@ public class FtpCmdFeat extends AbstractFtpCmd {
     	msg.append(msg(MSG211_FEAT_ENTRY, " MLST Type*;Modify*;Size*;Perm*;UNIX.mode*;UNIX.owner*;UNIX.group*;Unique*;")).append("\r\n");
     	msg.append(msg(MSG211_FEAT_ENTRY, " ERET")).append("\r\n");
     	msg.append(msg(MSG211_FEAT_ENTRY, " ESTO")).append("\r\n");
+    	msg.append(msg(MSG211_FEAT_ENTRY, " CKSUM MD5")).append("\r\n");
 //    	msg.append(msg(MSG211_FEAT_ENTRY, "SPAS")).append("\r\n");
 //    	msg.append(msg(MSG211_FEAT_ENTRY, "SPOR")).append("\r\n");
 //    	msg.append(msg(MSG211_FEAT_ENTRY, "REST STREAM")).append("\r\n");

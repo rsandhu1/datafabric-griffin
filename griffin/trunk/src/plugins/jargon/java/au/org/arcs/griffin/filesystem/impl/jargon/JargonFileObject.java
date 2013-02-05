@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,6 +29,7 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.DataObjectAO;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileInputStream;
 
@@ -422,6 +424,20 @@ public class JargonFileObject implements FileObject {
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	@Override
+	public String getCheckSum(String algorithm) throws IOException,
+			NoSuchAlgorithmException {
+		if (!algorithm.equalsIgnoreCase("MD5")) throw new NoSuchAlgorithmException("Only MD5 is supported.");
+		try {
+			DataObjectAO dataObjectAO=connection.getDataObjectAO();
+			return dataObjectAO.computeMD5ChecksumOnDataObject((IRODSFile) remoteFile);
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			log.error("Cannot get data object AO from jargon", e);
 			throw new IOException(e.getMessage());
 		}
 	}

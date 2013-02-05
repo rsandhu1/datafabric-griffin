@@ -143,6 +143,9 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
     private int controlChannelMode;
     private InetAddress clientInetAddress;
     private InetAddress localInetAddress;
+    
+    protected String chksumAlgorithm;
+    protected String chksumHash;
 
     /**
      * Constructor.
@@ -849,6 +852,25 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
 
 	public void setLocalInetAddress(InetAddress localInetAddress) {
 		this.localInetAddress = localInetAddress;
+	}
+
+	@Override
+	public void setChecksum(String algorithm, String hash) {
+		this.chksumAlgorithm=algorithm;
+		this.chksumHash=hash;
+		
+	}
+
+	@Override
+	public String getChecksumAlgorithm() {
+		// TODO Auto-generated method stub
+		return this.chksumAlgorithm;
+	}
+
+	@Override
+	public String getChecksumHash() {
+		// TODO Auto-generated method stub
+		return this.chksumHash;
 	}
 	
 	

@@ -8,6 +8,7 @@
 	<bean id="cmdAuth" class="au.org.arcs.griffin.cmd.impl.FtpCmdAuthGSI" singleton="false" />
 	<bean id="cmdAdat" class="au.org.arcs.griffin.cmd.impl.FtpCmdAdat" singleton="false" />
 	<bean id="cmdCdup" class="au.org.arcs.griffin.cmd.impl.FtpCmdCdup" singleton="false" />
+	<bean id="cmdCksm" class="au.org.arcs.griffin.cmd.impl.FtpCmdCksm" singleton="false" />
 	<bean id="cmdClnt" class="au.org.arcs.griffin.cmd.impl.FtpCmdClnt" singleton="false" />
 	<bean id="cmdCwd" class="au.org.arcs.griffin.cmd.impl.FtpCmdCwd" singleton="false" />
 	<bean id="cmdCcc" class="au.org.arcs.griffin.cmd.impl.FtpCmdCcc" singleton="false" />
@@ -42,6 +43,7 @@
 	<bean id="cmdRnfr" class="au.org.arcs.griffin.cmd.impl.FtpCmdRnfr" singleton="false" />
 	<bean id="cmdRnto" class="au.org.arcs.griffin.cmd.impl.FtpCmdRnto" singleton="false" />
 	<bean id="cmdSbuf" class="au.org.arcs.griffin.cmd.impl.FtpCmdSbuf" singleton="false" />
+	<bean id="cmdScks" class="au.org.arcs.griffin.cmd.impl.FtpCmdScks" singleton="false" />
 	<bean id="cmdSite" class="au.org.arcs.griffin.cmd.impl.FtpCmdSite" singleton="false" />
 	<bean id="cmdSize" class="au.org.arcs.griffin.cmd.impl.FtpCmdSize" singleton="false" />
 	<bean id="cmdSpas" class="au.org.arcs.griffin.cmd.impl.FtpCmdSpas" singleton="false" />
@@ -72,6 +74,7 @@
 				<entry key="APPE" value="cmdAppe" />
 				<entry key="AUTH" value="cmdAuth" />
 				<entry key="CCC" value="cmdCcc" />
+				<entry key="CKSM" value="cmdCksm" />
 				<entry key="CDUP" value="cmdCdup" />
 				<entry key="CLNT" value="cmdClnt" />
 				<entry key="CWD" value="cmdCwd" />
@@ -109,6 +112,7 @@
 				<entry key="RMD" value="cmdRmd" />
 				<entry key="SBUF" value="cmdSbuf" />
 				<entry key="SITE" value="cmdSite" />
+				<entry key="SCKS" value="cmdScks" />
 				<entry key="SIZE" value="cmdSize" />
 				<entry key="SMNT" value="cmdNotImpl" />
 				<entry key="SPAS" value="cmdSpas" />

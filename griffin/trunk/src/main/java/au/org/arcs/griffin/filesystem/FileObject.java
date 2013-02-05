@@ -3,6 +3,7 @@ package au.org.arcs.griffin.filesystem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * File object interface
@@ -152,4 +153,14 @@ public interface FileObject {
      * @throws IOException If file access fails or privileges are insufficient.
      */
     public InputStream getInpuStream(long offset) throws IOException;
+    
+    /**
+     * get checksum of the file using given algorithm
+     * if the given algorithm is not supported, a NoSuchAlgorithmException will be thrown
+     * for other data access issues, an IOException will be thrown
+     * @param algorithm
+     * @return
+     * @throws IOException
+     */
+    public String getCheckSum(String algorithm) throws IOException, NoSuchAlgorithmException;
 }

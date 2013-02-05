@@ -422,4 +422,7 @@ public interface FtpSessionContext {
 	InetAddress getLocalInetAddress();
 	void setLocalInetAddress(InetAddress localInetAddress);
 
+	void setChecksum(String algorithm, String hash);
+	String getChecksumAlgorithm();
+	String getChecksumHash();
 }

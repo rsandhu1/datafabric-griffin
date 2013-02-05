@@ -29,6 +29,8 @@ import org.irods.jargon.core.connection.GSIIRODSAccount;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.IRODSAccount.AuthScheme;
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.DataObjectAO;
+import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
 import org.irods.jargon.core.pub.io.IRODSFileFactoryImpl;
 
@@ -231,5 +233,8 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 		return fileFactory;
 	}
 
+	public DataObjectAO getDataObjectAO() throws JargonException {
+		return IRODSFileSystem.instance().getIRODSAccessObjectFactory().getDataObjectAO(account);
+	}
     
 }

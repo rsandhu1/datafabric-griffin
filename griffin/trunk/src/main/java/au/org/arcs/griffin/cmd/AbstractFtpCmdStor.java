@@ -26,6 +26,7 @@ package au.org.arcs.griffin.cmd;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -137,24 +138,38 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
             getCtx().getTransferMonitor().sendPerfMarker();
             getCtx().updateAverageStat(STAT_UPLOAD_RATE,
                     (int) getCtx().getTransferMonitor().getCurrentTransferRate());
-            msgOut(MSG226);
+            if (getCtx().getChecksumHash()!=null&&getCtx().getChecksumAlgorithm()!=null) {
+            	String hash;
+				try {
+					hash = file.getCheckSum(getCtx().getChecksumAlgorithm());
+	            	if (hash.equalsIgnoreCase(getCtx().getChecksumHash()))
+	            		msgOut(MSG226);
+	            	else
+	            		out("400 "+getCtx().getChecksumAlgorithm()+" mismatch - data corruption detected");
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					log.error("given algorithm is not supported", e);
+					out("400 given algorithm is not supported");
+				}
+				getCtx().setChecksum(null, null);
+            } else
+            	msgOut(MSG226);
         } catch (FtpUniqueConstraintException e) {
             msgOut(MSG553);
         } catch (FtpPermissionException e) {
             msgOut(MSG550_MSG, e.getMessage());
         } catch (FtpException e) {
             msgOut(MSG550_MSG, e.getMessage());
-            log.warn(e.getMessage());
+            log.error(e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             msgOut(MSG550_MSG, "Unsupported Encoding: " + charset);
-            log.error(e.toString());
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
             msgOut(MSG550_MSG, e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         } catch (RuntimeException e) {
-            e.printStackTrace();
             msgOut(MSG550);
-            log.error(e.toString());
+            log.error(e.getMessage(), e);
         } finally {
             log.debug("in finally");
             if (mode == MODE_STREAM) {
