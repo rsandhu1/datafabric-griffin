@@ -195,7 +195,7 @@ public final class FtpServerStarter {
 //            serverList.add(sslsvr);
             if ("true".equalsIgnoreCase(svr.getSshEnabled())) {
             	server_details=new SftpServerDetails("","");
-            	startSshServer();
+            	startSshServer(appContext);
             }
             addShutdownHook(serverList, sshd);
             
@@ -267,13 +267,13 @@ public final class FtpServerStarter {
 	/**
 	 * Starts the SFTP to Irods server. 
 	 */
-	public void startSshServer()
+	public void startSshServer(ApplicationContext appContext)
 	{	
 		try
 		{
 			//Init and load all the server details/option
 			//loads the application context details as Bean objects 
-			server_details.loadBeans();
+			server_details.loadBeans(appContext);
 			KeyPairProvider keypair_provider=server_details.getKeyPairProvider();
 			
 			// Check local ip addresses
@@ -284,7 +284,7 @@ public final class FtpServerStarter {
 				System.exit(1);
 			}
 			//log server setup details
-			server_details.logSetup(log,addr);
+			server_details.logSetup(addr);
 			
 			// Start server
 			runServer(keypair_provider);

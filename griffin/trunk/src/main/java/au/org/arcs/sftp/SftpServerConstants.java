@@ -22,7 +22,7 @@ public interface SftpServerConstants extends SftpConstants
 	/**
 	 * Environment property key that points to the application's home directory.
 	 */
-	public static final String	SYS_HOME_DIR				= "isftp.home.dir";
+	public static final String	SYS_HOME_DIR				= "GRIFFIN_HOME";
 	public static final String	SYS_LOG_DIR					= "isftp.log.dir";
 		
 

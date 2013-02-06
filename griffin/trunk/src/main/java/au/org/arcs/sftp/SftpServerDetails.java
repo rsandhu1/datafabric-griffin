@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.sshd.common.KeyPairProvider;
 import org.apache.sshd.common.util.SecurityUtils;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
@@ -38,7 +39,7 @@ public class SftpServerDetails implements SftpServerConstants
 	//Bean data
 	private SftpConfigProperties	options=null;
 	private FileSystem				fileSystem=null;
-	
+	private static Log       log                         = LogFactory.getLog(SftpServerDetails.class);
 	
 	public SftpServerDetails(String beanPath,String logDetailsPath)
 	{
@@ -80,7 +81,7 @@ public class SftpServerDetails implements SftpServerConstants
 		return logDetailsPath;
 	}
 
-	public void loadBeans() throws IOException
+	public void loadBeans(ApplicationContext appContext) throws IOException
 	{
 		if(fileSystem!=null)
 			return;	//Already loaded
@@ -89,9 +90,9 @@ public class SftpServerDetails implements SftpServerConstants
 			throw new IOException(appProperties.getAppTitle()+" application properties not set");	
 				
 		//load the application context
-		ApplicationContext appContext = loadApplicationContext(getDefaultBeanPath());
-		if(appContext==null)
-			throw new IOException(appProperties.getAppTitle()+" application context file not found: "+getContextFile());	
+//		ApplicationContext appContext = loadApplicationContext(getDefaultBeanPath());
+//		if(appContext==null)
+//			throw new IOException(appProperties.getAppTitle()+" application context file not found: "+getContextFile());	
 		
 		// Load server options bean
 		this.options=(SftpConfigProperties) appContext.getBean(DEFAULT_BEAN_SFTP_OPTIONS);
@@ -103,7 +104,7 @@ public class SftpServerDetails implements SftpServerConstants
 		// Load file system bean
 		this.fileSystem=(FileSystem) appContext.getBean(DEFAULT_BEAN_FILE_SYSTEM);
 		
-		fileSystem.init();	
+//		fileSystem.init();	
 	}
 	
 
@@ -261,28 +262,28 @@ public class SftpServerDetails implements SftpServerConstants
 		if (getSystemHomeDirectory() != null)
 			return;	//Done
 		
-		//Check for explicit directory in options
-		String context_dir=options.getHomeDirectory();
-		if(setHomeDir(context_dir))
-			return;
-		
-		//Fail if we had one but unable to set
-		if(context_dir!=null && context_dir.length()>0)
-			throw new IOException("Unable to set the context home directory: "+context_dir);	
-		
-		//Now try parent of the context menu
-		File context_file_abs=context_file.getAbsoluteFile();
-		if(setHomeDir(context_file_abs.getParent()))
-			return;
-		
-		//Fail if we had a valid but unable to set
-		if(context_file_abs.exists())
-			throw new IOException("Unable to set root directory to the context files parent: "+context_file_abs.getParent());
-		
-		File defaultDir = new File(System.getProperty("user.home"), "sftpirods");
-		if(setHomeDir(defaultDir.getAbsolutePath()))
-			return;
-		
+//		//Check for explicit directory in options
+//		String context_dir=options.getHomeDirectory();
+//		if(setHomeDir(context_dir))
+//			return;
+//		
+//		//Fail if we had one but unable to set
+//		if(context_dir!=null && context_dir.length()>0)
+//			throw new IOException("Unable to set the context home directory: "+context_dir);	
+//		
+//		//Now try parent of the context menu
+//		File context_file_abs=context_file.getAbsoluteFile();
+//		if(setHomeDir(context_file_abs.getParent()))
+//			return;
+//		
+//		//Fail if we had a valid but unable to set
+//		if(context_file_abs.exists())
+//			throw new IOException("Unable to set root directory to the context files parent: "+context_file_abs.getParent());
+//		
+//		File defaultDir = new File(System.getProperty("user.home"), "sftpirods");
+//		if(setHomeDir(defaultDir.getAbsolutePath()))
+//			return;
+//		
 		throw new IOException("Unable to set a valid root directory.");	
 	}
 
@@ -316,6 +317,7 @@ public class SftpServerDetails implements SftpServerConstants
 	 */
 	public static String getSystemHomeDirectory()
 	{
+		log.debug("APP_HOME:"+System.getProperty(SYS_HOME_DIR));
 		return System.getProperty(SYS_HOME_DIR);
 	}
 		
@@ -431,16 +433,16 @@ public class SftpServerDetails implements SftpServerConstants
 		return getInitialChannelPacketBytes();
 	}
 	
-	public void logSetup(Log log,InetAddress machine_addr)
+	public void logSetup(InetAddress machine_addr)
 	{
 		log.info("Attempting to Start "+getAppTitle()+" on port " + getOptions().getSftpPort()+"...");
 		log.info("Local ip address: " + machine_addr.getHostAddress());
 		
 		log.info("Application resource stream: " + getAppProperties().getResource());
-		getAppProperties().logAll(log,getAppTitle()+" application resource settings");
+//		getAppProperties().logAll(log,getAppTitle()+" application resource settings");
 
-		log.info("Application context file: " + getContextFile());
-		getOptions().logAll(log,getAppTitle()+" context file settings");
+//		log.info("Application context file: " + getContextFile());
+//		getOptions().logAll(log,getAppTitle()+" context file settings");
 
 		log.info(getAppTitle()+" home directory: "+getSystemHomeDirectory());
 		//log.info(getAppName()+" log directory: "+getSystemLoggingDirectory());	
