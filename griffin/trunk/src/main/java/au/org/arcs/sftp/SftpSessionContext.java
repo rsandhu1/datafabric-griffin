@@ -83,6 +83,7 @@ public class SftpSessionContext implements SftpServerConstants
 	
 	public void disconnectFileSystem()
 	{
+		log.debug("disconnectFileSystem");
 		if (getFileSystemConnection() != null)
 		{
 			try
