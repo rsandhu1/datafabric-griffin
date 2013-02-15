@@ -236,6 +236,7 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 			running=true;
 			channels=new ArrayList<DataChannel>();
 			int num=0;
+			transferThreads.clear();
 			while (running){
 				try {
 					Socket dataSocket = serverSocket.accept();
@@ -248,6 +249,7 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 					channels.add(dc);
 					Thread t=new Thread(dc);
 					transferThreads.add(t);
+					log.debug("transferThreads has "+transferThreads.size()+" threads.");
 					t.start();
 					num++;
 				} catch (IOException e) {
@@ -315,17 +317,29 @@ public class PassiveModeTCPDataChannelProvider extends TCPDataChannelProvider {
 	@Override
 	public void transferData() throws IOException {
 		sos.pollQueue();
-		for (Thread t:transferThreads){
-			if (t.isAlive()){
-				try {
-					log.debug("thread "+t+" joined.");
-					t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		log.debug("dataChannelCount:"+dataChannelCount+";eodNum:"+eodNum);
+		while (dataChannelCount<=0||dataChannelCount>eodNum){
+			sos.pollQueue();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			log.debug("dataChannelCount:"+dataChannelCount+";eodNum:"+eodNum);
 		}
+		log.debug("transferThreads has "+transferThreads.size()+" threads.");
+//		for (Thread t:transferThreads){
+//			if (t.isAlive()){
+//				try {
+//					log.debug("thread "+t+" joined.");
+//					t.join();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		log.debug("all threads finished. channels.size()="+channels.size()+" closing sos");
 		if (sos!=null){
 			try {
