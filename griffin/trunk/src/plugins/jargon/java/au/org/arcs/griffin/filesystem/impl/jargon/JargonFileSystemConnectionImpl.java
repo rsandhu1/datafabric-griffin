@@ -44,7 +44,6 @@ import au.org.arcs.griffin.filesystem.FileSystemConnection;
 public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 
     private static Log log = LogFactory.getLog(JargonFileSystemConnectionImpl.class);
-    private IRODSFileFactory fileFactory;
     private IRODSAccount account;
     private String user;
     private String homeCollection;
@@ -74,7 +73,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
         try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
             account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
-			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+            log.debug("account:" + account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
@@ -118,7 +117,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 //			                                        + "/home/" + username,
 //			                                        defaultResource);
 //	        account.setAuthenticationScheme(AuthScheme.GSI);
-			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+//			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
@@ -145,21 +144,21 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 			                      zoneName, defaultResource==null?"":defaultResource);
     	if (authType.equalsIgnoreCase("pam")) 
     		account.setAuthenticationScheme(AuthScheme.PAM);
-        try {
-			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
+//        try {
+//			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
-		} catch (JargonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-            try {
-				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
-			} catch (JargonException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			throw new IOException(e.getMessage());
-		} 
+//		} catch (JargonException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//            try {
+//				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+//			} catch (JargonException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			throw new IOException(e.getMessage());
+//		} 
 		
 	}
 
@@ -195,8 +194,8 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      * {@inheritDoc}
      */
     public void close() throws IOException {
-        if (fileFactory != null) {
-            log.debug("closing irods connecton:" + fileFactory);
+//        if (fileFactory != null) {
+            log.debug("closing irods connecton for:" + account);
             try {
 				this.jargonFileSystem.getIRODSFileSystem().closeSession(this.account);
 			} catch (JargonException e) {
@@ -204,8 +203,8 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 				e.printStackTrace();
 				throw new IOException(e.getMessage());
 			}
-            fileFactory = null;
-        }
+//            fileFactory = null;
+//        }
 
     }
 
@@ -229,8 +228,8 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
         return -1;
     }
 
-	public IRODSFileFactory getFileFactory() {
-		return fileFactory;
+	public IRODSFileFactory getFileFactory() throws JargonException {
+		return IRODSFileSystem.instance().getIRODSAccessObjectFactory().getIRODSFileFactory(account);
 	}
 
 	public DataObjectAO getDataObjectAO() throws JargonException {
