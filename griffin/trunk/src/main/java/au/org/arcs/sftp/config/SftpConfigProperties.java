@@ -57,7 +57,7 @@ public class SftpConfigProperties extends SftpProperties
 	
 	//We are using 8080 as it is an outgoing port that is often open
 	private static final int		DEFAULT_ISFTP_PORT	= 8080;	//22
-	private static final int		DEFAULT_MAX_IDLE_SECONDS= 600;
+	private static final int		DEFAULT_MAX_IDLE_SECONDS= 0;
 	private static final int		DEFAULT_MAX_USER_CONNECTIONS= 10;
     
 	
@@ -122,7 +122,7 @@ public class SftpConfigProperties extends SftpProperties
 	 */
 	public int getMaxIdleSeconds()
 	{
-		return getInt(OPT_MAX_IDLE_SECONDS, DEFAULT_MAX_IDLE_SECONDS);
+		return getInt(OPT_MAX_IDLE_SECONDS, DEFAULT_MAX_IDLE_SECONDS)*1000;
 	}
 
 	/**
