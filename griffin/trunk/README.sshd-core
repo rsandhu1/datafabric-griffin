@@ -2,6 +2,11 @@ sshd-core has a bug that prevents uploading big files.
 In sshd-core/src/main/java/org/apache/sshd/common/channel/AbstractChannel.java
 
 =====================================================================================
+
+    public static final int DEFAULT_WINDOW_SIZE = 0x2000000;
+    public static final int DEFAULT_PACKET_SIZE = 0x80000;
+
+
     public void handleData(Buffer buffer) throws IOException {
         int len = buffer.getInt();
         if (len < 0 || len > 32768) {
@@ -36,5 +41,5 @@ In sshd-core/src/main/java/org/apache/sshd/common/channel/AbstractChannel.java
     }
 =====================================================================================
 
-Need to change 32768 to 512000
+Need to change 32768 to 524288
 The sshd-core-0.8.0.jar has been updated as above. This is required if a new sshd-core.jar is released but this bug is not fixed.
