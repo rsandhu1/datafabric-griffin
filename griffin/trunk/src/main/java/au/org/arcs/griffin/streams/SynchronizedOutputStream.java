@@ -30,7 +30,7 @@ public class SynchronizedOutputStream {
 			dataQueue.put(newBlock);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		}
 	}
@@ -55,7 +55,7 @@ public class SynchronizedOutputStream {
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				throw new IOException(e.getMessage());
 			}
 		}
