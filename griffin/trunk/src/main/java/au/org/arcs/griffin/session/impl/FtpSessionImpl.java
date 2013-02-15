@@ -149,12 +149,14 @@ public class FtpSessionImpl extends Thread implements FtpSession, FtpConstants {
 //            out(welcome);
 //        }
         String hostname="localhost";
+        log.debug("title:"+title);
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		log.debug("hostname:"+hostname);
         String welcome = formatResString(MSG220, new Object[] {hostname, title, version});
 //        getFtpContext().getClientResponseWriter().println(welcome);
         out(welcome);
