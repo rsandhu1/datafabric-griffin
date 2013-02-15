@@ -327,7 +327,10 @@ public final class FtpServerStarter {
 		//Set max concurrent connections
 		sshd.getProperties().put(ServerFactoryManager.MAX_CONCURRENT_SESSIONS, 
 							Integer.toString(getServerDetails().getOptions().getMaxUserConnections()));
-		
+
+		sshd.getProperties().put(ServerFactoryManager.IDLE_TIMEOUT, 
+				Integer.toString(getServerDetails().getOptions().getMaxIdleSeconds()));
+
 		//Set server ident that is returned by server to client
 		sshd.getProperties().put(ServerFactoryManager.SERVER_IDENTIFICATION, 
 				getServerDetails().getAppProperties().getServerIdentification());
