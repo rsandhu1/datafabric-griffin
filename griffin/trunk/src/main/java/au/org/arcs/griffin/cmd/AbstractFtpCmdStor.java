@@ -138,6 +138,7 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
             getCtx().getTransferMonitor().sendPerfMarker();
             getCtx().updateAverageStat(STAT_UPLOAD_RATE,
                     (int) getCtx().getTransferMonitor().getCurrentTransferRate());
+            log.debug("checksum?"+getCtx().getChecksumHash());
             if (getCtx().getChecksumHash()!=null&&getCtx().getChecksumAlgorithm()!=null) {
             	String hash;
 				try {
@@ -168,7 +169,7 @@ public abstract class AbstractFtpCmdStor extends AbstractFtpCmd {
             msgOut(MSG550_MSG, e.getMessage());
             log.error(e.getMessage(), e);
         } catch (RuntimeException e) {
-            msgOut(MSG550);
+            msgOut(MSG550_MSG, e.getMessage());
             log.error(e.getMessage(), e);
         } finally {
             log.debug("in finally");

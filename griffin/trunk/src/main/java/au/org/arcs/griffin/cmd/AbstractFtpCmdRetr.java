@@ -171,24 +171,20 @@ public abstract class AbstractFtpCmdRetr extends AbstractFtpCmd implements FtpCo
             msgOut(MSG226);
         } catch (FtpQuotaException e) {
             log.error(e.toString());
-            msgOut(MSG550, e.getMessage());
-            log.warn(e.getMessage());
+            msgOut(MSG550_MSG, e.getMessage());
         } catch (FtpPermissionException e) {
             log.error(e.toString());
             msgOut(MSG550_PERM);
         } catch (UnsupportedEncodingException e) {
             log.error(e.toString());
-            msgOut(MSG550, "Unsupported Encoding: " + charset);
+            msgOut(MSG550_MSG, "Unsupported Encoding: " + charset);
             log.error(e.toString());
         } catch (IOException e) {
             log.error(e.toString());
-            msgOut(MSG550);
-            log.error(e.toString());
+            msgOut(MSG550_MSG, e.getMessage());
         } catch (RuntimeException e) {
-        	e.printStackTrace();
-            log.error(e.toString());
+            log.error(e.toString(), e);
             msgOut(MSG550);
-            log.error(e.toString());
         } finally {
             log.debug("in finally");
             if (mode == MODE_STREAM) {
