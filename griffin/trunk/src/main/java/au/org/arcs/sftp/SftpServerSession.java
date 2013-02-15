@@ -2,6 +2,7 @@ package au.org.arcs.sftp;
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.sshd.SshServer;
+import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.server.session.ServerSession;
 
 /**
@@ -30,5 +31,11 @@ public class SftpServerSession
 	public SftpSessionContext getSftpSessionContext()
 	{
 		return sftpSessionContext;
+	}
+
+	@Override
+	public CloseFuture close(boolean immediately) {
+		if (sftpSessionContext!=null) sftpSessionContext.disconnectFileSystem();
+		return super.close(immediately);
 	}
 }
