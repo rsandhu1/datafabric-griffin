@@ -222,7 +222,7 @@ public class TCPDataChannel implements DataChannel {
 	            }
 //	            say("Adapter: done, EOD received ? = " + eod);
 	        } catch (IOException e) {
-	        	e.printStackTrace();
+	        	log.error(e.getMessage(), e);
 //	            esay(e);
 	            // what can we do here ??
 
@@ -287,7 +287,7 @@ public class TCPDataChannel implements DataChannel {
 	            }
 	        } catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+	        	log.error(e.getMessage(), e);
 //			} finally {
 //	            IOUtils.closeGracefully(is);
 //	            IOUtils.closeGracefully(os);
