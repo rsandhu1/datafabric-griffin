@@ -214,8 +214,8 @@ public class JargonFileSystemImpl implements FileSystem {
 			e1.printStackTrace();
 			throw new IOException(e1.getMessage());
 		}
-		log.debug("JargonFileSystemImpl is checking map file in "+System.getProperty(FtpConstants.GRIFFIN_HOME));
 		if (getMapFile()!=null){
+			log.debug("JargonFileSystemImpl is checking map file in "+System.getProperty(FtpConstants.GRIFFIN_HOME));
 			mapping=new HashMap<String,String>();
 			if (updateInterval==0) updateInterval=10;
 			readMapFile();
@@ -267,9 +267,11 @@ public class JargonFileSystemImpl implements FileSystem {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		log.debug("stopping update thread...");
-		updateThread.running=false;
-		updateThread.interrupt();
+		if (updateThread!=null) {
+			log.debug("stopping update thread...");
+			updateThread.running=false;
+			updateThread.interrupt();
+		}
 	}
 	
 	protected void readMapFile() throws IOException{
@@ -446,9 +448,10 @@ public class JargonFileSystemImpl implements FileSystem {
 		File irodsAFile=new File(System.getProperty("user.home")+File.separator+".irods"+File.separator+".irodsA");
 		log.debug("irodsEnvFile:"+irodsEnvFile);
 		if (!irodsEnvFile.exists()||!irodsAFile.exists()) throw new FtpConfigException("cannot find admin user config in .irods");
+        IRODSFileSystem irodsFileSystem = null;
+    	IRODSAccount adminAccount=readUserInfo(irodsEnvFile,irodsAFile);
 		try {
-        	IRODSAccount adminAccount=readUserInfo(irodsEnvFile,irodsAFile);
-	        IRODSFileSystem irodsFileSystem = IRODSFileSystem.instance();
+			irodsFileSystem = IRODSFileSystem.instance();
 	        UserAO userAO=irodsFileSystem.getIRODSAccessObjectFactory().getUserAO(adminAccount);
 	        StringBuilder sb = new StringBuilder();
 			sb.append(RodsGenQueryEnum.COL_USER_DN.getName());
@@ -467,16 +470,24 @@ public class JargonFileSystemImpl implements FileSystem {
 				log.debug("found matched user:"+username);
 		        String password=userAO.getTemporaryPasswordForASpecifiedUser(username);
 		        log.debug("got temp password:"+password);
-		        irodsFileSystem.closeAndEatExceptions(adminAccount);
 				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, "irods", username, password, zoneName, defaultResource);
 				return connection;
 			}
 		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
+		} finally {
+	        if (irodsFileSystem!=null)
+				try {
+					log.debug("closing admin connection");
+					irodsFileSystem.close(adminAccount);
+				} catch (JargonException e) {
+					// TODO Auto-generated catch block
+					log.error("Error when closing admin connection.", e);
+				}
 		}
 
 		return null;
