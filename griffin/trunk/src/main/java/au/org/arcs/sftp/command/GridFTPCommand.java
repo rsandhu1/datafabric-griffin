@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -91,6 +92,7 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
         if (error != null) {
             throw error;
         }
+        if (serverSession!=null) this.name = ((SftpServerSession)serverSession).getSftpSessionContext().getUser();
         new Thread(this, "GridFTPCommand: " + name).start();
     }
     public void destroy() {
@@ -148,7 +150,7 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
             }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
             log.error("Session closed because of error while executing command", e);
 		} finally {
             terminated = true;
@@ -161,9 +163,21 @@ public class GridFTPCommand implements Command, Runnable, FtpConstants, SessionA
     }
     
     private void ackLogin() throws IOException{
-		String loginMessage="220 df1-dev.ivec.org GridFTP Server 6.5 (gcc64, 1323378368-83) [unknown] ready.\r\n";
-		out.write(loginMessage.getBytes());
+        String title = getFtpContext().getOptions().getAppTitle();
+        String version = getFtpContext().getOptions().getAppVersion();
+        String hostname="localhost";
+        log.debug("title:"+title);
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        log.debug("hostname:"+hostname);
+		String loginMessage=formatResString(FtpConstants.MSG220, new Object[] {hostname, title, version});
+		out.write((loginMessage+"\r\n").getBytes());
 		out.flush();
+		log.debug("welcome msg:"+loginMessage);
     }
     private void out(String msg) {
         getFtpContext().getClientResponseWriter().println(msg);
