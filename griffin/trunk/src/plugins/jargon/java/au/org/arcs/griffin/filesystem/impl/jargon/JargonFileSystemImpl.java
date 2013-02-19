@@ -453,6 +453,7 @@ public class JargonFileSystemImpl implements FileSystem {
 		try {
 			irodsFileSystem = IRODSFileSystem.instance();
 	        UserAO userAO=irodsFileSystem.getIRODSAccessObjectFactory().getUserAO(adminAccount);
+	        log.debug("userAO:"+userAO);
 	        StringBuilder sb = new StringBuilder();
 			sb.append(RodsGenQueryEnum.COL_USER_DN.getName());
 			sb.append(" LIKE '");
@@ -465,6 +466,7 @@ public class JargonFileSystemImpl implements FileSystem {
 			sb.append(username);
 			sb.append("'");
 			List<User> users = userAO.findWhere(sb.toString());
+			log.debug("query string:"+sb);
 			if (users.size()>0) {
 				username=users.get(0).getName();
 				log.debug("found matched user:"+username);
@@ -596,7 +598,7 @@ public class JargonFileSystemImpl implements FileSystem {
        int wheel_len;
        int[] wheel=new int[26+26+10+15];
        int j, addin, addin_i, kpos, found, nout=0;
-       char[] headstring=new char[10];
+       char[] headstring=new char[100];
        int ii, too_short;
        char[] my_out, my_in;
        int not_en, encodedTime;

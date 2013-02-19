@@ -95,7 +95,7 @@ public class SftpPublickeyAuthenticator implements PublickeyAuthenticator
 	 		sshKeyType = "ssh-dss";
 		}
 		byte[] sshkey=tw.getBytes();
-		log.debug("keyString: "+getBase64WithoutNewline(sshkey));
+		log.debug("keyString: "+sshKeyType+" "+getBase64WithoutNewline(sshkey));
 		// File f = new File("/Users/" + username + "/.ssh/authorized_keys");
 		// return true;
 		SftpServerSession sftp_server_session = (SftpServerSession) server_session;
