@@ -57,13 +57,16 @@ public class FtpCmdMkd extends AbstractFtpCmd {
      * {@inheritDoc}
      */
     public void execute() throws FtpCmdException {
-    	String path=getCtx().getRemoteDir();
+    	String path=getPathArg(); //getCtx().getRemoteDir();
+    	log.debug("path:"+path);
     	FileObject file=getCtx().getFileSystemConnection().getFileObject(path);
-        if ((file.getPermission() & PRIV_WRITE) == 0) {
+    	log.debug("file.getParent().getPermission():"+file.getParent().getPermission());
+        if ((file.getParent().getPermission() & PRIV_WRITE) == 0) {
             msgOut(MSG550_PERM);
             return;
         }
         String response;
+        log.debug("getPathArg():"+getPathArg());
         FileObject dir = getCtx().getFileSystemConnection().getFileObject(getPathArg());
         if (dir.exists()) {
             log.debug(dir + " already exists");
