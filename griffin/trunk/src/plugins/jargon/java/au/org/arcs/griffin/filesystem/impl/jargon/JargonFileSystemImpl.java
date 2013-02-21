@@ -172,6 +172,12 @@ public class JargonFileSystemImpl implements FileSystem {
 			GSSCredential credential) throws FtpConfigException, IOException{
 		if (mapping==null){
 			try {
+	            try {
+					log.info("gssCredential: "+ credential.getName().toString());
+				} catch (GSSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				FileSystemConnection connection = new JargonFileSystemConnectionImpl(this, serverName, serverPort, credential, defaultResource);
 				return connection;
 			} catch (NullPointerException e) {

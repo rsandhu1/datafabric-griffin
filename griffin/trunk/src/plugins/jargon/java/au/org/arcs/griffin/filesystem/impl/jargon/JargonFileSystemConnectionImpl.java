@@ -73,12 +73,19 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
         try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
             account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
+            jargonFileSystem.getIRODSFileSystem().currentConnection(account);
             log.debug("account:" + account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			log.error("GSI login failed.", e);
+            try {
+				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+			} catch (JargonException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			throw new IOException(e.getMessage());
 		}
     }
@@ -107,6 +114,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
                 + credential.toString());
         try {
             account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
+//            jargonFileSystem.getIRODSFileSystem().currentConnection(account);
             account.setZone(zoneName);
             account.setUserName(username);
 //            account.setDefaultStorageResource(defaultResource);
@@ -122,7 +130,13 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
             homeCollection = account.getHomeDirectory();
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("GSI login failed.", e);
+            try {
+				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+			} catch (JargonException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			throw new IOException(e.getMessage());
 		}
     }
@@ -146,11 +160,12 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
     		account.setAuthenticationScheme(AuthScheme.PAM);
 //        try {
 //			fileFactory = new IRODSFileFactoryImpl(jargonFileSystem.getIRODSFileSystem(), account);
-            user = account.getUserName();
-            homeCollection = account.getHomeDirectory();
+//	        jargonFileSystem.getIRODSFileSystem().currentConnection(account);
+	        user = account.getUserName();
+	        homeCollection = account.getHomeDirectory();
 //		} catch (JargonException e) {
 //			// TODO Auto-generated catch block
-//			e.printStackTrace();
+//			log.error(authType+" login failed.", e);
 //            try {
 //				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
 //			} catch (JargonException e1) {
