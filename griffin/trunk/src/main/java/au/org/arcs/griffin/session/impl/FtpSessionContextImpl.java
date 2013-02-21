@@ -394,6 +394,7 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
         setAttribute(ATTR_LOGIN_TIME, new Date());
         dirName = fileSystemConnection.getHomeDir();
         user = fileSystemConnection.getUser();
+        log.debug("user:" + user);
         setRemoteDir(dirName);
         log.debug("fs.isconnected:" + fileSystemConnection.isConnected());
         authenticated = true;
