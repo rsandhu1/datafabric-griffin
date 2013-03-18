@@ -73,7 +73,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
         try {
 //            	IRODSCommands cmd=jargonFileSystem.getIRODSFileSystem().currentConnection(account);
             account = GSIIRODSAccount.instance(serverName, serverPort, credential, defaultResource==null?"":defaultResource);
-            jargonFileSystem.getIRODSFileSystem().currentConnection(account);
+            jargonFileSystem.getIrodsSession().currentConnection(account);
             log.debug("account:" + account);
             user = account.getUserName();
             homeCollection = account.getHomeDirectory();
@@ -81,7 +81,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 			// TODO Auto-generated catch block
 			log.error("GSI login failed.", e);
             try {
-				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+				this.jargonFileSystem.getIrodsSession().closeSession(account);
 			} catch (JargonException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -132,7 +132,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 			// TODO Auto-generated catch block
 			log.error("GSI login failed.", e);
             try {
-				this.jargonFileSystem.getIRODSFileSystem().closeSession(account);
+				this.jargonFileSystem.getIrodsSession().closeSession(account);
 			} catch (JargonException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -212,7 +212,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
 //        if (fileFactory != null) {
             log.debug("closing irods connecton for:" + account);
             try {
-				this.jargonFileSystem.getIRODSFileSystem().closeSession(this.account);
+				this.jargonFileSystem.getIrodsSession().closeSession(this.account);
 			} catch (JargonException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -228,7 +228,7 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
      */
     public boolean isConnected() {
         try {
-			return jargonFileSystem.getIRODSFileSystem().currentConnection(account).isConnected();
+			return jargonFileSystem.getIrodsSession().currentConnection(account).isConnected();
 		} catch (JargonException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -244,11 +244,11 @@ public class JargonFileSystemConnectionImpl implements FileSystemConnection {
     }
 
 	public IRODSFileFactory getFileFactory() throws JargonException {
-		return IRODSFileSystem.instance().getIRODSAccessObjectFactory().getIRODSFileFactory(account);
+		return jargonFileSystem.getIrodsAccessObjectFactory().getIRODSFileFactory(account);
 	}
 
 	public DataObjectAO getDataObjectAO() throws JargonException {
-		return IRODSFileSystem.instance().getIRODSAccessObjectFactory().getDataObjectAO(account);
+		return jargonFileSystem.getIrodsAccessObjectFactory().getDataObjectAO(account);
 	}
     
 }

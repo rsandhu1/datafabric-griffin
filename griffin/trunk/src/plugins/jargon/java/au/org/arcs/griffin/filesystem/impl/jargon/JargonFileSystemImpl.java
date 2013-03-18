@@ -33,6 +33,7 @@ import org.irods.jargon.core.connection.IRODSSimpleProtocolManager;
 import org.irods.jargon.core.connection.SettableJargonProperties;
 import org.irods.jargon.core.connection.IRODSAccount.AuthScheme;
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.UserAO;
 import org.irods.jargon.core.pub.domain.User;
@@ -62,8 +63,8 @@ public class JargonFileSystemImpl implements FileSystem {
 	private String defaultResource;
 	private UpdateThread updateThread;
 	private int updateInterval;
-	private IRODSSession iRODSFileSystem;
-	private IRODSProtocolManager iRODSProtocolManager;
+	private IRODSSession irodsSession;
+	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private String zoneName;
 	private String adminCertFile;
 	private String adminKeyFile;
@@ -71,6 +72,23 @@ public class JargonFileSystemImpl implements FileSystem {
     private String myProxyServerHost;
     private int myProxyServerPort;
 	
+	public IRODSSession getIrodsSession() {
+		return irodsSession;
+	}
+
+	public void setIrodsSession(IRODSSession irodsSession) {
+		this.irodsSession = irodsSession;
+	}
+
+	public IRODSAccessObjectFactory getIrodsAccessObjectFactory() {
+		return irodsAccessObjectFactory;
+	}
+
+	public void setIrodsAccessObjectFactory(
+			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
+	}
+
 	public String getJargonInternalCacheBufferSize() {
 		return jargonInternalCacheBufferSize;
 	}
@@ -202,23 +220,14 @@ public class JargonFileSystemImpl implements FileSystem {
 	}
 
 	public void init() throws IOException{
-		try {
-			iRODSProtocolManager=IRODSSimpleProtocolManager.instance();
-			iRODSProtocolManager.initialize();
-			iRODSFileSystem=new IRODSSession(iRODSProtocolManager);
-			if (jargonInternalCacheBufferSize!=null) {
-				try {
-					SettableJargonProperties overrideJargonProperties = new SettableJargonProperties();
-					overrideJargonProperties.setInternalCacheBufferSize(Integer.parseInt(jargonInternalCacheBufferSize));
-					iRODSFileSystem.setJargonProperties(overrideJargonProperties);
-				}catch (Exception e2){
-					e2.printStackTrace();
-				}
+		if (jargonInternalCacheBufferSize!=null) {
+			try {
+				SettableJargonProperties overrideJargonProperties = new SettableJargonProperties();
+				overrideJargonProperties.setInternalCacheBufferSize(Integer.parseInt(jargonInternalCacheBufferSize));
+				irodsSession.setJargonProperties(overrideJargonProperties);
+			}catch (Exception e){
+				log.error("Cannot set jargon buffer size", e);
 			}
-		} catch (JargonException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			throw new IOException(e1.getMessage());
 		}
 		if (getMapFile()!=null){
 			log.debug("JargonFileSystemImpl is checking map file in "+System.getProperty(FtpConstants.GRIFFIN_HOME));
@@ -262,16 +271,10 @@ public class JargonFileSystemImpl implements FileSystem {
 
 	public void exit() {
 		try {
-			iRODSFileSystem.closeSession();
+			irodsSession.closeSession();
 		} catch (JargonException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
-		try {
-			iRODSProtocolManager.destroy();
-		} catch (JargonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		if (updateThread!=null) {
 			log.debug("stopping update thread...");
@@ -323,10 +326,6 @@ public class JargonFileSystemImpl implements FileSystem {
 				}
 		    }
 		}
-	}
-
-	public IRODSSession getIRODSFileSystem() {
-		return iRODSFileSystem;
 	}
 
 	@Override
