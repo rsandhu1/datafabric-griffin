@@ -56,12 +56,12 @@ public class FtpCmdDele extends AbstractFtpCmd {
      */
     public void execute() throws FtpCmdException {
         String response;
-    	String path=getCtx().getRemoteDir();
+    	String path=getPathArg();
     	FileObject file=getCtx().getFileSystemConnection().getFileObject(path);
         if ((file.getPermission() & PRIV_WRITE) == 0) {
             response = msg(MSG550_PERM);
         } else {
-        	file = getCtx().getFileSystemConnection().getFileObject(getPathArg());
+        	file = getCtx().getFileSystemConnection().getFileObject(path);
             if (!file.exists() || file.isDirectory()) {
                 log.debug(file.getName() + " not found");
                 response = msg(MSG550);

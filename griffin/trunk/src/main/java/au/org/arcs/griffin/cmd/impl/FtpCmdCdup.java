@@ -52,7 +52,7 @@ public class FtpCmdCdup extends AbstractFtpCmd {
      * {@inheritDoc}
      */
     public void execute() throws FtpCmdException {
-        FileObject dir = getCtx().getFileSystemConnection().getFileObject(getCtx().getRemoteDir());
+        FileObject dir = getCtx().getFileSystemConnection().getFileObject(getPathArg());
         FileObject parent = dir.getParent();
         if (parent == null) {
             msgOut(MSG550);

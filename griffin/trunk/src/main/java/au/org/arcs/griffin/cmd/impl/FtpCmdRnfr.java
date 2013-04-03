@@ -49,16 +49,16 @@ public class FtpCmdRnfr extends AbstractFtpCmd {
      * {@inheritDoc}
      */
     public void execute() throws FtpCmdException {
-    	FileObject dir=getCtx().getFileSystemConnection().getFileObject(getCtx().getRemoteDir());
-        if ((dir.getPermission() & PRIV_WRITE) == 0) {
-            msgOut(MSG550_PERM);
-            return;
-        }
         String fileName = getPathArg();
         FileObject file = getCtx().getFileSystemConnection().getFileObject(fileName);
         if (!file.exists()) {
             msgOut(MSG550);
         } else {
+        	FileObject dir=file.getParent();
+            if ((dir.getPermission() & PRIV_WRITE) == 0) {
+                msgOut(MSG550_PERM);
+                return;
+            }
             getCtx().setAttribute(ATTR_RENAME_FILE, file);
             msgOut(MSG350);
         }
