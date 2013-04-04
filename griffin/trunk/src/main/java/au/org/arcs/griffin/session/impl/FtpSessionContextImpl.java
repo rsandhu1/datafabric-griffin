@@ -224,7 +224,7 @@ public class FtpSessionContextImpl implements FtpConstants, FtpSessionContext {
      */
     public String getRemoteDir() {
         if (remoteDir == null) {
-            remoteDir = getOptions().getRootDir();
+            remoteDir = fileSystemConnection.getHomeDir(); //.getOptions().getRootDir();
         }
         return remoteDir;
     }
