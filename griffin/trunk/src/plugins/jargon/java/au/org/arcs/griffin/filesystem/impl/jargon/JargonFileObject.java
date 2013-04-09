@@ -29,9 +29,14 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.protovalues.FilePermissionEnum;
+import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
 import org.irods.jargon.core.pub.DataObjectAO;
+import org.irods.jargon.core.pub.domain.UserFilePermission;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileInputStream;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
 
 import au.org.arcs.griffin.common.FtpConstants;
 import au.org.arcs.griffin.filesystem.FileObject;
@@ -46,6 +51,7 @@ public class JargonFileObject implements FileObject {
 	
     protected File remoteFile = null;
     protected JargonFileSystemConnectionImpl connection = null;
+    protected CollectionAndDataObjectListingEntry cacheFile = null;
     protected String originalName;
 	public static final int JARGON_MAX_QUERY_NUM = 100000;
 
@@ -82,9 +88,22 @@ public class JargonFileObject implements FileObject {
     }
 
     /**
+     * Constructor using a cache file object (CollectionAndDataObjectListingEntry).
+     * 
+     * @param aConnection Connection to file system handler.
+     * @param file cache file object.
+     */
+    public JargonFileObject(JargonFileSystemConnectionImpl aConnection,
+    		CollectionAndDataObjectListingEntry file) {
+        this.connection = aConnection;
+        this.cacheFile = file;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public boolean exists() {
+    	if (cacheFile!=null) return true;
         return remoteFile.exists();
     }
 
@@ -92,6 +111,10 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public String getName() {
+    	if (cacheFile!=null) {
+    		return MiscIRODSUtils
+					.getLastPathComponentForGiveAbsolutePath(cacheFile.getPathOrName());
+    	}
     	if (originalName!=null&&(originalName.equals(".")||originalName.equals(".."))) return originalName;
         return remoteFile.getName();
     }
@@ -100,6 +123,9 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public String getPath() {
+    	if (cacheFile!=null) {
+    		return cacheFile.getPathOrName();
+    	}
         return remoteFile.getPath();
     }
 
@@ -107,21 +133,39 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public int getPermission() {
-        int permission = FtpConstants.PRIV_NONE;
-        if (remoteFile.canRead() && remoteFile.canWrite()) {
-            permission = FtpConstants.PRIV_READ_WRITE;
-        } else if (remoteFile.canRead() && !remoteFile.canWrite()) {
-            permission = FtpConstants.PRIV_READ;
-        } else if (!remoteFile.canRead() && remoteFile.canWrite()) {
-            permission = FtpConstants.PRIV_WRITE;
-        }
-        return permission;
+//        int permission = FtpConstants.PRIV_NONE;
+//        if (remoteFile.canRead() && remoteFile.canWrite()) {
+//            permission = FtpConstants.PRIV_READ_WRITE;
+//        } else if (remoteFile.canRead() && !remoteFile.canWrite()) {
+//            permission = FtpConstants.PRIV_READ;
+//        } else if (!remoteFile.canRead() && remoteFile.canWrite()) {
+//            permission = FtpConstants.PRIV_WRITE;
+//        }
+    	if (cacheFile!=null) {
+    		List<UserFilePermission> permissions=cacheFile.getUserFilePermission();
+    		for (UserFilePermission perm:permissions) {
+    			if (perm.getUserName().equalsIgnoreCase(cacheFile.getOwnerName())) {
+    				FilePermissionEnum p=perm.getFilePermissionEnum();
+    				log.debug("perm:"+p);
+    				if (p==FilePermissionEnum.OWN) return FtpConstants.PRIV_READ_WRITE;
+    				if (p==FilePermissionEnum.WRITE) return FtpConstants.PRIV_WRITE;
+    				if (p==FilePermissionEnum.READ) return FtpConstants.PRIV_READ;
+    				return FtpConstants.PRIV_NONE;
+    			}
+    		}
+    	}
+    	int perm = (remoteFile.canRead()?FtpConstants.PRIV_READ:FtpConstants.PRIV_NONE)|(remoteFile.canWrite()?FtpConstants.PRIV_WRITE:FtpConstants.PRIV_NONE);
+    	log.debug("perm:"+perm);
+    	return perm;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isDirectory() {
+    	if (cacheFile!=null) {
+    		return cacheFile.isCollection();
+    	}
         return remoteFile.isDirectory();
     }
 
@@ -129,6 +173,9 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public boolean isFile() {
+    	if (cacheFile!=null) {
+    		return cacheFile.isDataObject();
+    	}
         return remoteFile.isFile();
     }
 
@@ -136,6 +183,9 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public String getCanonicalPath() throws IOException {
+    	if (cacheFile!=null) {
+    		return cacheFile.getPathOrName();
+    	}
         return remoteFile.getCanonicalPath();
     }
 
@@ -146,12 +196,23 @@ public class JargonFileObject implements FileObject {
     	
 //        GeneralFile[] flist = remoteFile.listFiles();
     	
-    	String[] files=remoteFile.list();
-    	FileObject[] fileObjects=new FileObject[files.length];
-    	for (int i=0;i<files.length;i++){
-			fileObjects[i]=new JargonFileObject(connection, remoteFile.getCanonicalPath()+"/"+files[i]);
-    	}
-    	return fileObjects;
+//    	String[] files=remoteFile.list();
+    	CollectionAndDataObjectListAndSearchAO ao;
+		try {
+			ao = connection.getCollectionAndDataObjectListAndSearchAO();
+	    	log.debug("going to query dir:"+getCanonicalPath());
+	    	List<CollectionAndDataObjectListingEntry> files=ao.listDataObjectsAndCollectionsUnderPathWithPermissions(getCanonicalPath());
+	    	log.debug("got "+files.size()+"objects.");
+	    	FileObject[] fileObjects=new FileObject[files.size()];
+	    	for (int i=0;i<files.size();i++){
+				fileObjects[i]=new JargonFileObject(connection, files.get(i));
+	    	}
+	    	return fileObjects;
+		} catch (JargonException e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage(), e);
+			throw new IOException(e.getMessage());
+		}
     	
 //        MetaDataCondition conditionsFile[] = {
 //				MetaDataSet.newCondition(GeneralMetaData.DIRECTORY_NAME, MetaDataCondition.EQUAL, remoteFile.getAbsolutePath()),
@@ -304,6 +365,9 @@ public class JargonFileObject implements FileObject {
     * {@inheritDoc}
     */
     public long lastModified() {
+    	if (cacheFile!=null) {
+    		return cacheFile.getModifiedAt().getTime();
+    	}
         return remoteFile.lastModified();
     }
 
@@ -311,6 +375,9 @@ public class JargonFileObject implements FileObject {
      * {@inheritDoc}
      */
     public long length() {
+    	if (cacheFile!=null) {
+    		return cacheFile.getDataSize();
+    	}
         return remoteFile.length();
     }
 
