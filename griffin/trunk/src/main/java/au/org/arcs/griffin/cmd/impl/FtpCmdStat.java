@@ -72,7 +72,7 @@ public class FtpCmdStat extends AbstractFtpCmd {
         	String path=getPathArg();
             FileObject dir = getCtx().getFileSystemConnection().getFileObject(path);
             if (!dir.exists()) {
-                msgOut(MSG550);
+                msgOut(MSG500_ERROR, new String[]{"No such file or directory"});
                 return;
             }
             if (dir.isDirectory()) {
