@@ -32,7 +32,7 @@ public class FtpCmdCksm extends AbstractFtpCmd {
         }
         StringBuffer sb;
 		try {
-			sb = new StringBuffer("200 "+file.getCheckSum(args[0]).toUpperCase());
+			sb = new StringBuffer("213 "+file.getCheckSum(args[0]).toLowerCase());
 	        out(sb.toString());
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
