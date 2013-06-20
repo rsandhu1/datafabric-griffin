@@ -306,7 +306,7 @@ public interface FtpConstants {
     public static final String   MSG211_FEAT_FOOTER        = "msg211_feat_footer";
 
     /** FTP response message 211. */
-    public static final String   MSG211_STAT               = "msg211_stat";
+    public static final String   MSG213_STAT               = "msg213_stat";
 
     /** FTP response message 213 (file size). */
     public static final String   MSG213_SIZE               = "msg213_size";
