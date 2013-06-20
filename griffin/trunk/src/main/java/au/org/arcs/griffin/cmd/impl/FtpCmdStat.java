@@ -24,11 +24,13 @@
 
 package au.org.arcs.griffin.cmd.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import au.org.arcs.griffin.cmd.AbstractFtpCmd;
 import au.org.arcs.griffin.exception.FtpCmdException;
@@ -56,25 +58,27 @@ import au.org.arcs.griffin.utils.IOUtils;
  * @author Lars Behnke
  */
 public class FtpCmdStat extends AbstractFtpCmd {
-
+	private static Log log = LogFactory.getLog(FtpCmdStat.class);
     /**
      * {@inheritDoc}
      */
     public void execute() throws FtpCmdException {
         String clientHost = getCtx().getClientInetAddress().getHostAddress();
         String msg = getCtx().getUser() + "(" + clientHost + ")";
-        msgOut(MSG211_STAT, new Object[] {msg});
         Map<String, Long> map = new HashMap(); //getCtx().getUserManager().getUserStatistics(getCtx().getUser());
         String arg = getArguments();
         if (arg.length() == 0) {
+            msgOut(MSG213_STAT, new Object[] {msg});
             printUserStatistics(map);
         } else {
         	String path=getPathArg();
+        	log.debug("getting stat of "+path);
             FileObject dir = getCtx().getFileSystemConnection().getFileObject(path);
             if (!dir.exists()) {
-                msgOut(MSG500_ERROR, new String[]{"No such file or directory"});
+                msgOut(MSG550_MSG, new String[]{"No such file or directory"});
                 return;
             }
+            msgOut(MSG213_STAT, new Object[] {path});
             if (dir.isDirectory()) {
                 FileObject[] files;
 				try {
@@ -94,14 +98,14 @@ public class FtpCmdStat extends AbstractFtpCmd {
                 doPrintFileInfo(dir, null);
             }
         }
-        out("211 ");
+        out("213 End.");
     }
 
     private void doPrintFileInfo(FileObject file, String filename) {
         int permission = file.getPermission();
         boolean read = (permission & PRIV_READ) > 0;
         boolean write = (permission & PRIV_WRITE) > 0;
-        out("211-" + IOUtils.formatUnixFtpFileInfo(getCtx().getUser(), file, read, write, null));
+        out(" " + IOUtils.formatUnixFtpFileInfo(getCtx().getUser(), file, read, write, null));
 
     }
 
@@ -118,7 +122,7 @@ public class FtpCmdStat extends AbstractFtpCmd {
 
     private void printOutStats(String statName, Long value) {
         long statValue = value == null ? 0 : value.longValue();
-        out("211-" + statName + ": " + statValue);
+        out(" " + statName + ": " + statValue);
     }
 
     /**
