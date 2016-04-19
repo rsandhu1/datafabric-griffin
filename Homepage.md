@@ -1,0 +1,103 @@
+# Griffin #
+
+Griffin is a GridFTP interface for arbitrary data sources.
+
+### Installation ###
+
+To install, download the tar.gz file and extract. Then run
+```
+bin/install.sh $GRIFFIN_HOME
+```
+e.g.
+```
+bin/install.sh /opt/griffin
+```
+This assumes you run it as ''`root`''.
+
+If you want to run it as a non-root user, you have to
+  * Modify `/etc/default/griffin`, add
+```
+APP_USER=non-root-user
+```
+  * Change the permissions of installed files. Usually that means that the the `logs` directory has to be for example assigned to a group that the user can write to, and add group write privileges to it.
+  * Make sure this user has access to host certificate/key files
+  * The plugin JAR file (`xxx-plugin.jar`) needs to be placed in the `$GRIFFIN_HOME/plugins` directory along with all required libraries (jar files).
+  * Use `/etc/init.d/griffin` to start/stop. (For debugging the option "`check`" to the init script may help.)
+  * For verification, inspect the log file under `$GRIFFIN_HOME/logs/griffin.log`
+
+### Build from Sources ###
+If you build from sources, stay in the source folder's root directory, and build using ANT:
+
+```
+ant
+ant -Dplugin=xxx
+```
+
+The `xxx` is a place holder for the plugin, and can be one of `jargon`, `localfs`, `mongodb` or `irods-conductor`. Some of these implementations may not be complete or work at a given moment.
+
+### Configuration ###
+The main configuration file is `$GRIFFIN_HOME/griffin-ctx.xml`
+
+GridFTP settings are
+```
+    <bean id="options"
+            class="au.org.arcs.griffin.server.impl.FtpServerOptionsImpl"
+            singleton="true">
+        <property name="properties">
+             <props>
+                 <prop key="max.connections">20</prop>
+                 <prop key="max.idle.seconds">600</prop>
+                 <prop key="buffer.size">2048000</prop>
+ 		 <prop key="allowed.passive.tcp.ports">40000-41000</prop>
+		 <prop key="allowed.passive.udp.ports">40000-41000</prop>
+                 <prop key="ftp.port">2811</prop>
+                 <prop key="charset.ebcdic">CP1047</prop>
+                 <prop key="charset.ascii">UTF-8</prop>
+                 <prop key="service.key">/etc/grid-security/irodskey.pem</prop>
+                 <prop key="service.cert">/etc/grid-security/irodscert.pem</prop>
+                 <prop key="service.trusted.certs">/etc/grid-security/certificates</prop>
+                 <!-- <prop key="ipv4.black.list">!127.0.0.1,!192.*.*.*</prop> -->
+             </props>
+        </property>
+    </bean>
+```
+Log configuration file is `$GRIFFIN_HOME/log4j.properties`
+
+### Storage Back-End Configuration ###
+  * [iRODS](IrodsConfiguration.md)
+  * [local file system storage](LocalFilesystemConfiguration.md)
+
+## GridFTP specs ##
+  * [RFC959 - File Transfer Protocol](http://www.faqs.org/rfcs/rfc959.html)
+  * [RFC3659 - Extensions to FTP](http://www.faqs.org/rfcs/rfc3659.html)
+  * [RFC2228 - FTP Security Extensions](http://www.faqs.org/rfcs/rfc2228.html)
+  * [GridFTP v1](http://www.ogf.org/documents/GFD.20.pdf) [quickview](http://docs.google.com/viewer?a=v&q=cache:oxVo41XI660J:www.ogf.org/documents/GFD.21.pdf+gridftp+Performance+Markers&hl=en&gl=au&sig=AHIEtbQeEFuNYVHXP-b9IkeOziDfQ0mlDA)
+  * [GridFTP v1 Improvements](http://www.ogf.org/documents/GFD.21.pdf) [quickview](http://www.google.com.au/url?q=http://docs.google.com/viewer%3Fa%3Dv%26q%3Dcache:oxVo41XI660J:www.ogf.org/documents/GFD.21.pdf%2Bgfd%2B21%26hl%3Den%26gl%3Dau%26sig%3DAHIEtbRC9UUkoSpa0d_DxjGL6ThQiZ-dNQ&ei=xlNyS729GcqTkAXtxOHvCQ&sa=X&oi=gview&resnum=1&ct=other&ved=0CAgQxQEwAA&usg=AFQjCNGHwdOaXsIO15SMJInKCIhAfzxCfA)
+  * [GridFTP v2](http://www.ogf.org/documents/GFD.47.pdf) [quickview](http://docs.google.com/viewer?a=v&q=cache:LzBdnyjzvWQJ:www.ogf.org/documents/GFD.47.pdf+gridftp+spec&hl=en&gl=au&pid=bl&srcid=ADGEEShqw2iOgSVS4ltp86lZh0kh2qFynX6WV3QN9JziijYiC0ORVll6-AMx1i1Pj5Ep3QEG-GXTsU6atDmiAFNsmzeKQD90ohTQgNLlEx_SX_29aUcd_yAiRZCr0zNpXzYPvQgKqPP6&sig=AHIEtbQRyI5qCiomdMKRyrfxXiDzxqfz-w)
+
+## Publications ##
+
+''Connecting arbitrary data resources to the grid.'' Shunde Zhang, Paul Coddington and Andrew Wendelborn. Accepted by [Grid Computing 2010](http://www.grid2010.org), Brussels, Belgium, Oct 2010. [attachment:gc-paper-final.pdf PDF]
+
+## Release Notes ##
+
+  * [0.8.4](ReleaseNotes08x.md) -  23 March 2012
+  * [0.8.3](ReleaseNotes08x.md) -  27 May 2011
+  * [0.8.2](ReleaseNotes08x.md) -  7 Apr 2011
+  * [0.8.1](ReleaseNotes08x.md) - 10 Mar 2011
+  * [0.7.3](ReleaseNotes07x.md) - 11 Oct 2010
+  * [0.7.0](ReleaseNotes07x.md) - 19 Apr 2010
+  * [0.6.0](ReleaseNotes06x.md) - 15 Mar 2010
+  * [0.5.0](ReleaseNotes05x.md) - 10 Feb 2010
+
+Get RPMs from:
+
+  * http://projects.arcs.org.au/trac/systems/browser/trunk/dataFabricScripts/iRODS/iRODS-GridFTP-RPMS
+
+## License ##
+
+This software is open source and under [Apache 2](http://www.apache.org/licenses/LICENSE-2.0.html) and [GPL](http://www.gnu.org/licenses/gpl.html).
+
+## Acknowledgment ##
+
+The implementation is based on an open source project, [Hermes FTP](http://sourceforge.net/projects/hermesftp/), and with help from [dCache](http://www.dcache.org) project.

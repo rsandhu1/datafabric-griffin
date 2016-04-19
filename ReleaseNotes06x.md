@@ -1,0 +1,25 @@
+New Features from 0.6.0:
+  * Parallel transfer
+    * for passive mode (PASV and STOR), client can open multiple connections to the server
+    * for active mode (PORT and RETR), client tells the server how many connections it wants via "OPTS parallelism", then server opens that amount of connections to the client.
+  * MLSD is implemented.
+  * DCAU A (self authentication) is supported. Thus, there is no need to include extra rftOptions in RLS files.
+
+Additional features in 0.6.1:
+  * the use of a mapfile when connecting to a slave iRODS due to a bug of iRODS. the mapfile contains multiple lines of '''"DN" user@zone''', e.g.
+```
+"/C=AU/O=APACGrid/OU=SAPAC/CN=Shunde Zhang" shunde@ARCS
+```
+  * allow specifying default resource.
+  * both require a change in griffin-ctx.xml file. e.g.
+```
+        <bean id="fileSystem" class="au.org.arcs.griffin.filesystem.impl.JargonFileSystemImpl" singleton="true">
+                <property name="serverName" value="localhost" />
+                <property name="serverPort" value="1247" />
+                <property name="serverType" value="irods" />
+                <property name="mapFile" value="irods-mapfile" />
+                <property name="defaultResource" value="resource1" />
+                <property name="updateInterval" value="10" />
+        </bean>
+```
+  * the mapfile's name is irods-mapfile, as shown above. it is in the same directory as griffin-ctx.xml. it will be refreshed every 10 minutes (updateInterval).
